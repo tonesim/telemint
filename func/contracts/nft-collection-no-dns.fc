@@ -1,3 +1,4 @@
+#include "../stdlib.fc";
 _ unwrap_signed_cmd(slice signed_cmd, int public_key, int subwallet_id, int msg_value) impure {
     (slice signature, int hash, int got_subwallet_id, int valid_since, int valid_till, slice cmd)
             = unpack_signed_cmd(signed_cmd);
