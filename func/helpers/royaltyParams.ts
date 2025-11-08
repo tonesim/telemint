@@ -1,13 +1,13 @@
 import { Address, beginCell, Cell } from '@ton/core';
 
 export type RoyaltyParams = {
-    numerator: number; // Числитель (0-65535)
-    denominator: number; // Знаменатель (0-65535)
-    destination: Address; // Адрес получателя роялти
+    numerator: number; // Numerator (0-65535)
+    denominator: number; // Denominator (0-65535)
+    destination: Address; // Royalty recipient address
 };
 
 /**
- * Создает параметры роялти для NFT
+ * Creates royalty parameters for NFT
  */
 export function createRoyaltyParams(params: RoyaltyParams): Cell {
     const { numerator, denominator, destination } = params;
@@ -27,7 +27,7 @@ export function createRoyaltyParams(params: RoyaltyParams): Cell {
 }
 
 /**
- * Создает параметры роялти без роялти (0%)
+ * Creates royalty parameters without royalty (0%)
  */
 export function createNoRoyaltyParams(destination: Address): Cell {
     return createRoyaltyParams({

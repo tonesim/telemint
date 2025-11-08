@@ -5,42 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7315d25a-7090-4767-a9c5-23518a5ce116" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.cursor/rules" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/MINT_FLOW.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/examples/backend-api.example.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/examples/frontend-mint.example.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/helpers/auctionConfig.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/helpers/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/helpers/nftContent.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/helpers/restrictions.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/helpers/royaltyParams.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/helpers/signMessage.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/tests/NftCollectionNoDns.spec.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/tests/NftItemNoDnsCheap.spec.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/tests/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/func/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/contracts/nft-collection.fc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/contracts/nft-item-no-dns-cheap-delayed.fc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/contracts/nft-item-no-dns.fc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/contracts/nft-item.fc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/jest.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/jest.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/scripts/deployTestContract.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/tests/NftCollection.spec.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/tests/TestContract.spec.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftCollection.compile.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftCollection.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftCollectionNoDns.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/wrappers/NftCollectionNoDns.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItem.compile.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItem.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/wrappers/NftItem.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDns.compile.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDns.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheap.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheap.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheapDelayed.compile.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheapDelayed.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/TestContract.compile.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/wrappers/TestContract.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/func/package-lock.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -184,7 +149,7 @@
       <option name="presentableId" value="Default" />
       <updated>1714981888253</updated>
       <workItem from="1714981889309" duration="500000" />
-      <workItem from="1762367199824" duration="21831000" />
+      <workItem from="1762367199824" duration="22676000" />
     </task>
     <servers />
   </component>

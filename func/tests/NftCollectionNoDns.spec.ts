@@ -165,7 +165,7 @@ describe('NftCollectionNoDns', () => {
             });
             const signature = signDeployMessage(unsignedMessage, privateKey);
             const mintResult = await collection.sendDeployMessageV2(deployer.getSender(), {
-                value: toNano('0.01'), // Меньше чем mintPrice
+                value: toNano('0.01'), // Less than mintPrice
                 signature,
                 subwalletId: 0,
                 validSince: now - 60,
@@ -194,7 +194,7 @@ describe('NftCollectionNoDns', () => {
             const unsignedMessage = createUnsignedDeployMessageV2({
                 subwalletId: 0,
                 validSince: now - 7200,
-                validTill: now - 3600, // Истекла час назад
+                validTill: now - 3600, // Expired 1 hour ago
                 tokenName,
                 content: nftContent,
                 auctionConfig,
@@ -230,7 +230,7 @@ describe('NftCollectionNoDns', () => {
 
             const unsignedMessage = createUnsignedDeployMessageV2({
                 subwalletId: 0,
-                validSince: now + 3600, // Станет валидной через час
+                validSince: now + 3600, // Will become valid in 1 hour
                 validTill: now + 7200,
                 tokenName,
                 content: nftContent,
@@ -266,7 +266,7 @@ describe('NftCollectionNoDns', () => {
             const royaltyParams = createNoRoyaltyParams(deployer.address);
 
             const unsignedMessage = createUnsignedDeployMessageV2({
-                subwalletId: 1, // Неправильный subwallet_id
+                subwalletId: 1, // Wrong subwallet_id
                 validSince: now - 60,
                 validTill: now + 3600,
                 tokenName,
@@ -278,7 +278,7 @@ describe('NftCollectionNoDns', () => {
             const mintResult = await collection.sendDeployMessageV2(deployer.getSender(), {
                 value: mintPrice,
                 signature,
-                subwalletId: 1, // Неправильный subwallet_id
+                subwalletId: 1, // Wrong subwallet_id
                 validSince: now - 60,
                 validTill: now + 3600,
                 tokenName,

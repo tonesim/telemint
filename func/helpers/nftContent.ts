@@ -4,11 +4,11 @@ export type NftContentParams = {
     name?: string;
     description?: string;
     image?: string;
-    [key: string]: any; // Дополнительные поля
+    [key: string]: any; // Additional fields
 };
 
 /**
- * Создает NFT контент в формате on-chain (JSON в Cell)
+ * Creates NFT content in on-chain format (JSON in Cell)
  */
 export function createNftContent(params: NftContentParams): Cell {
     const content = {
@@ -18,7 +18,7 @@ export function createNftContent(params: NftContentParams): Cell {
         ...params,
     };
 
-    // Сериализуем JSON в Cell
+    // Serialize JSON to Cell
     const jsonString = JSON.stringify(content);
     return beginCell()
         .storeUint(0, 8) // off-chain content tag
@@ -38,12 +38,12 @@ export function createNumberNftContent(number: string, metadata?: Record<string,
 export function parseNftContent(cell: Cell): NftContentParams {
     const slice = cell.beginParse();
 
-    // Читаем tag (первый байт)
+    // Read tag (first byte)
     const tag = slice.loadUint(8);
 
-    // Если tag = 0, это off-chain content (JSON строка)
+    // If tag = 0, this is off-chain content (JSON string)
     if (tag === 0) {
-        // Читаем строку (JSON)
+        // Read string (JSON)
         const jsonString = slice.loadStringTail();
 
         try {
@@ -52,7 +52,7 @@ export function parseNftContent(cell: Cell): NftContentParams {
             throw new Error(`Failed to parse NFT content JSON: ${e}`);
         }
     } else {
-        // Для других типов контента (on-chain) нужна другая логика
+        // For other content types (on-chain) different logic is needed
         throw new Error(`Unsupported NFT content tag: ${tag}`);
     }
 }

@@ -1,8 +1,8 @@
 /**
- * Пример бэкенд API для генерации подписанных сообщений для минта номеров
+ * Backend API example for generating signed messages for number minting
  * 
- * Этот файл показывает, как реализовать бэкенд эндпоинт для генерации
- * подписанных сообщений для минта NFT номеров из пула
+ * This file shows how to implement a backend endpoint for generating
+ * signed messages for minting NFT numbers from a pool
  */
 
 import { Address, Cell, toNano } from '@ton/core';
@@ -13,27 +13,27 @@ import { createNoRoyaltyParams } from '../helpers/royaltyParams';
 import { createRestrictions } from '../helpers/restrictions';
 import { createUnsignedDeployMessageV2, signDeployMessage, createSignedDeployMessageV2 } from '../helpers/signMessage';
 
-// Конфигурация контракта (должна храниться в безопасном месте)
+// Contract configuration (should be stored securely)
 const CONTRACT_CONFIG = {
-    subwalletId: 0, // Subwallet ID коллекции
-    privateKey: Buffer.from('YOUR_PRIVATE_KEY_HERE', 'hex'), // Приватный ключ для подписи
-    publicKey: Buffer.from('YOUR_PUBLIC_KEY_HERE', 'hex'), // Публичный ключ (соответствует privateKey)
-    collectionAddress: Address.parse('YOUR_COLLECTION_ADDRESS'), // Адрес коллекции
-    beneficiaryAddress: Address.parse('YOUR_BENEFICIARY_ADDRESS'), // Адрес получателя средств
-    mintPrice: toNano('0.1'), // Цена минта в TON
-    signatureValidityWindow: 3600, // Окно валидности подписи в секундах (1 час)
+    subwalletId: 0, // Collection subwallet ID
+    privateKey: Buffer.from('YOUR_PRIVATE_KEY_HERE', 'hex'), // Private key for signing
+    publicKey: Buffer.from('YOUR_PUBLIC_KEY_HERE', 'hex'), // Public key (corresponds to privateKey)
+    collectionAddress: Address.parse('YOUR_COLLECTION_ADDRESS'), // Collection address
+    beneficiaryAddress: Address.parse('YOUR_BENEFICIARY_ADDRESS'), // Beneficiary address
+    mintPrice: toNano('0.1'), // Mint price in TON
+    signatureValidityWindow: 3600, // Signature validity window in seconds (1 hour)
 };
 
-// Пул доступных номеров (в реальном приложении это должна быть БД)
+// Pool of available numbers (in real app this should be a DB)
 const AVAILABLE_NUMBERS = new Set<string>();
 const MINTED_NUMBERS = new Set<string>();
 
 /**
- * Генерирует доступный номер из пула
+ * Generates available number from pool
  */
 function getAvailableNumber(): string | null {
-    // В реальном приложении здесь должна быть логика выбора номера из БД
-    // с проверкой, что номер не был заминтирован
+    // In real app this should have logic to select number from DB
+    // with check that number hasn't been minted
     for (const number of AVAILABLE_NUMBERS) {
         if (!MINTED_NUMBERS.has(number)) {
             return number;
@@ -43,14 +43,14 @@ function getAvailableNumber(): string | null {
 }
 
 /**
- * Помечает номер как заминтированный
+ * Marks number as minted
  */
 function markNumberAsMinted(number: string) {
     MINTED_NUMBERS.add(number);
 }
 
 /**
- * API эндпоинт: Генерация подписанного сообщения для минта
+ * API endpoint: Generate signed message for minting
  * 
  * POST /api/mint/prepare
  * Body: { userAddress: string }
@@ -59,40 +59,40 @@ function markNumberAsMinted(number: string) {
  *   unsignedMessage: string, // hex encoded Cell
  *   signature: string, // hex encoded signature
  *   signedMessage: string, // hex encoded signed message
- *   tokenName: string, // номер
- *   mintPrice: string, // цена в nanoTON
- *   validTill: number, // timestamp до которого валидна подпись
+ *   tokenName: string, // number
+ *   mintPrice: string, // price in nanoTON
+ *   validTill: number, // timestamp until which signature is valid
  * }
  */
 export async function prepareMintMessage(userAddress: string) {
-    // 1. Проверяем, есть ли доступные номера
+    // 1. Check if there are available numbers
     const number = getAvailableNumber();
     if (!number) {
         throw new Error('No available numbers in pool');
     }
 
-    // 2. Создаем NFT контент
+    // 2. Create NFT content
     const nftContent = createNumberNftContent(number);
 
-    // 3. Создаем auction config для прямого минта
+    // 3. Create auction config for direct mint
     const auctionConfig = createDirectMintAuctionConfig({
         beneficiaryAddress: CONTRACT_CONFIG.beneficiaryAddress,
         mintPrice: CONTRACT_CONFIG.mintPrice,
     });
 
-    // 4. Создаем royalty params (без роялти)
+    // 4. Create royalty params (no royalty)
     const royaltyParams = createNoRoyaltyParams(CONTRACT_CONFIG.beneficiaryAddress);
 
-    // 5. Опционально: создаем restrictions, чтобы только этот пользователь мог минтить
+    // 5. Optionally: create restrictions so only this user can mint
     const restrictions = createRestrictions({
         forceSenderAddress: Address.parse(userAddress),
     });
 
-    // 6. Создаем unsigned deploy message
+    // 6. Create unsigned deploy message
     const now = Math.floor(Date.now() / 1000);
     const unsignedMessage = createUnsignedDeployMessageV2({
         subwalletId: CONTRACT_CONFIG.subwalletId,
-        validSince: now - 60, // Начало валидности (1 минута назад для запаса)
+        validSince: now - 60, // Validity start (1 minute ago for buffer)
         validTill: now + CONTRACT_CONFIG.signatureValidityWindow,
         tokenName: number,
         content: nftContent,
@@ -101,14 +101,14 @@ export async function prepareMintMessage(userAddress: string) {
         restrictions,
     });
 
-    // 7. Подписываем сообщение
+    // 7. Sign message
     const signature = signDeployMessage(unsignedMessage, CONTRACT_CONFIG.privateKey);
 
-    // 8. Создаем полное подписанное сообщение
+    // 8. Create complete signed message
     const signedMessage = createSignedDeployMessageV2(unsignedMessage, signature);
 
-    // 9. Помечаем номер как зарезервированный (в реальном приложении)
-    // markNumberAsMinted(number); // Раскомментируйте после успешного минта
+    // 9. Mark number as reserved (in real app)
+    // markNumberAsMinted(number); // Uncomment after successful mint
 
     return {
         unsignedMessage: unsignedMessage.toBoc().toString('base64'),
@@ -121,16 +121,16 @@ export async function prepareMintMessage(userAddress: string) {
 }
 
 /**
- * API эндпоинт: Подтверждение успешного минта
+ * API endpoint: Confirm successful mint
  * 
  * POST /api/mint/confirm
  * Body: { tokenName: string, txHash: string }
  * 
- * Помечает номер как заминтированный после успешной транзакции
+ * Marks number as minted after successful transaction
  */
 export async function confirmMint(tokenName: string, txHash: string) {
-    // В реальном приложении здесь должна быть проверка транзакции в блокчейне
-    // и только после подтверждения помечать номер как заминтированный
+    // In real app this should check transaction in blockchain
+    // and only mark number as minted after confirmation
     
     markNumberAsMinted(tokenName);
     
@@ -142,7 +142,7 @@ export async function confirmMint(tokenName: string, txHash: string) {
 }
 
 /**
- * Пример использования с Express.js:
+ * Usage example with Express.js:
  * 
  * import express from 'express';
  * const app = express();

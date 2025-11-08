@@ -1,33 +1,39 @@
 # .cursor/rules
 
-## Тесты: общие принципы
+## Language
 
-* Пиши поведение, не реализацию. Шаблон: AAA или Given–When–Then.
-* Один смысл на тест. Ясные имена: `should_<ожидание>`.
-* Тесты детерминированны. Время, сеть, случайность — замокать.
-* Тесты независимы. Порядок выполнения не важен.
-* Быстрые unit. Интеграционные и e2e — выборочно, по критическим путям.
-* Данные через фабрики/билдеры. Покрывай краевые случаи.
-* Мокай только внешние границы. Собственную логику — реальная.
-* TDD-дисциплина: красный → зелёный → рефакторинг.
-* Coverage — индикатор, не цель. Порог: 80–90% lines/branches.
-* Снепшоты только для стабильных структур/UI.
-* Параллельный прогон без конфликтов: изолированные БД, порты, tmp.
-* Flaky запрещены. Ретраи — временная мера, заводи тикет на причину.
+* **All code, comments, and documentation must be in English only.**
+* No Russian text in code, comments, variable names, or documentation.
+* Error messages and user-facing strings should be in English.
 
-## Пирамида
+## Tests: General Principles
 
-* Unit: чистые функции и сервисы без I/O.
-* Integration: реальные адаптеры (БД, брокер, Redis) в изоляции.
-* Contract: потребитель–поставщик (Pact) для внешних API.
-* E2E: минимум happy-path + критические ошибки.
-* Perf/Load: вне CI PR, но до релиза.
+* Write behavior, not implementation. Pattern: AAA or Given–When–Then.
+* One purpose per test. Clear names: `should_<expectation>`.
+* Tests are deterministic. Time, network, randomness — mock them.
+* Tests are independent. Execution order doesn't matter.
+* Fast unit tests. Integration and e2e — selectively, on critical paths.
+* Data through factories/builders. Cover edge cases.
+* Mock only external boundaries. Own logic — real.
+* TDD discipline: red → green → refactor.
+* Coverage — indicator, not goal. Threshold: 80–90% lines/branches.
+* Snapshots only for stable structures/UI.
+* Parallel execution without conflicts: isolated DB, ports, tmp.
+* Flaky tests are forbidden. Retries — temporary measure, create ticket for root cause.
 
-## Структура теста
+## Pyramid
+
+* Unit: pure functions and services without I/O.
+* Integration: real adapters (DB, broker, Redis) in isolation.
+* Contract: consumer–provider (Pact) for external APIs.
+* E2E: minimum happy-path + critical errors.
+* Perf/Load: outside CI PR, but before release.
+
+## Test Structure
 
 ```ts
-describe('Модуль/кейс', () => {
-  it('should <ожидание>', async () => {
+describe('Module/case', () => {
+  it('should <expectation>', async () => {
     // Arrange
     // Act
     // Assert
@@ -35,83 +41,83 @@ describe('Модуль/кейс', () => {
 });
 ```
 
-## Данные и фикстуры
+## Data and Fixtures
 
-* Фабрики: `makeUser(overrides?)`, `makeOrder(...)`.
-* Фиксируй Clock и Random.
-* Для БД: миграция один раз, далее — транзакция на тест и откат.
+* Factories: `makeUser(overrides?)`, `makeOrder(...)`.
+* Fix Clock and Random.
+* For DB: migrate once, then — transaction per test and rollback.
 
-## Моки и стабы
+## Mocks and Stubs
 
-* Мокай HTTP, FS, очередь, таймеры, UUID/Random.
-* Не мокай лёгкие утилиты и чистые функции.
-* Для Redis: namespace ключей в интеграционном окружении.
+* Mock HTTP, FS, queue, timers, UUID/Random.
+* Don't mock lightweight utilities and pure functions.
+* For Redis: namespace keys in integration environment.
 
-## Контракты и схемы
+## Contracts and Schemas
 
-* DTO заверяй JSON Schema на входе и выходе.
-* Контракт-тесты между сервисами. Версионируй контракты.
+* Verify DTOs with JSON Schema on input and output.
+* Contract tests between services. Version contracts.
 
-## Проверки ошибок
+## Error Checks
 
-* Тестируй не только happy-path: ошибки, таймауты, пустые входы.
-* Инварианты и guards — отдельными кейсами.
+* Test not only happy-path: errors, timeouts, empty inputs.
+* Invariants and guards — separate cases.
 
-## Антипаттерны
+## Anti-patterns
 
-* “Один тест всё проверяет”.
-* Моки глубоко внутри домена.
-* Ожидания на приватные методы.
-* Зависимость от реального времени/сети.
-* Огромные снепшоты.
+* "One test checks everything".
+* Mocks deep inside domain.
+* Expectations on private methods.
+* Dependency on real time/network.
+* Huge snapshots.
 
-## Метрики качества
+## Quality Metrics
 
-* Coverage: lines/branches/functions ≥ 80–90% для критичных пакетов.
-* Mutation score (Stryker) ≥ 70% для ядра.
-* Flakiness = 0 в main.
+* Coverage: lines/branches/functions ≥ 80–90% for critical packages.
+* Mutation score (Stryker) ≥ 70% for core.
+* Flakiness = 0 in main.
 
 ## CI/PR
 
-* Порядок: lint → typecheck → unit → integration (по метке/папке) → e2e.
-* Публикуй артефакты: coverage, junit, скриншоты e2e.
-* Тесты — часть “Definition of Done”.
+* Order: lint → typecheck → unit → integration (by label/folder) → e2e.
+* Publish artifacts: coverage, junit, e2e screenshots.
+* Tests — part of "Definition of Done".
 
-## NestJS + Prisma + Redis (правила генерации тестов)
+## NestJS + Prisma + Redis (test generation rules)
 
-* Unit (Jest/Vitest): сервисы с замоканными репозиториями/клиентами. Фиксируй Clock/Random.
-* Integration (Prisma): Testcontainers или отдельная тест-БД. Миграции → транзакция на тест → откат.
-* Redis: unit — моки клиента; integration — ephemeral Redis с уникальным namespace.
-* E2E (NestJS): `@nestjs/testing` + `supertest`. Реальный HTTP. Внешние сервисы — замоканные или по контрактному серверу.
+* Unit (Jest/Vitest): services with mocked repositories/clients. Fix Clock/Random.
+* Integration (Prisma): Testcontainers or separate test DB. Migrations → transaction per test → rollback.
+* Redis: unit — mock client; integration — ephemeral Redis with unique namespace.
+* E2E (NestJS): `@nestjs/testing` + `supertest`. Real HTTP. External services — mocked or via contract server.
 
-## Обязательные кейсы
+## Required Cases
 
-* Края: пустые коллекции, max длины, дубликаты, null/undefined.
-* Идемпотентность, ретраи, дедупликация.
-* Транзакционные инварианты “всё или ничего”.
-* Конкурентность: два параллельных апдейта одного ресурса.
-* Безопасность: авторизация, запрет изменений защищённых полей.
-* Локализация/кодировки.
-* Миграции БД: `up`/`down` на пустой и на существующей схеме.
+* Edges: empty collections, max lengths, duplicates, null/undefined.
+* Idempotency, retries, deduplication.
+* Transactional invariants "all or nothing".
+* Concurrency: two parallel updates of one resource.
+* Security: authorization, prohibition of changes to protected fields.
+* Localization/encodings.
+* DB migrations: `up`/`down` on empty and existing schema.
 
-## Быстрые правила
+## Quick Rules
 
-* Каждый найденный баг — новый тест.
-* Любая новая публичная функция — с тестом.
-* Любое изменение контракта — обнови контракт-тесты.
-* Время прогона в PR держать ≤ 5 минут. Дольше — шардируй или выноси тяжёлые тесты.
+* Every found bug — new test.
+* Any new public function — with test.
+* Any contract change — update contract tests.
+* Keep PR run time ≤ 5 minutes. Longer — shard or move heavy tests out.
 
-## Инструменты (рекомендации)
+## Tools (recommendations)
 
-* Раннер: Vitest или Jest.
-* E2E: Supertest; для фронта — Playwright.
-* Контейнеры: Testcontainers.
-* Ковередж: Istanbul.
-* Мутации: Stryker.
-* Контракты: Pact.
-* Фабрики: fishery/test-data-bot или собственные билдеры.
+* Runner: Vitest or Jest.
+* E2E: Supertest; for frontend — Playwright.
+* Containers: Testcontainers.
+* Coverage: Istanbul.
+* Mutations: Stryker.
+* Contracts: Pact.
+* Factories: fishery/test-data-bot or custom builders.
 
-## Шаблон unit-теста (NestJS)
+## Unit Test Template (NestJS)
 
 ```ts
 import { Test } from '@nestjs/testing';
@@ -120,7 +126,7 @@ import { Repo } from './repo';
 
 describe('MyService', () => {
   it('should create user with normalized email', async () => {
-    const repo: Partial<Repo> = { create: vi.fn().mockResolvedValue({ id: 1 }) }; // jest.fn() если Jest
+    const repo: Partial<Repo> = { create: vi.fn().mockResolvedValue({ id: 1 }) }; // jest.fn() if Jest
     const module = await Test.createTestingModule({
       providers: [MyService, { provide: Repo, useValue: repo }],
     }).compile();
@@ -132,7 +138,7 @@ describe('MyService', () => {
 });
 ```
 
-## Шаблон e2e (NestJS + supertest)
+## E2E Template (NestJS + supertest)
 
 ```ts
 import { Test } from '@nestjs/testing';

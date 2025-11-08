@@ -1,101 +1,101 @@
 # Telemint - Mint Numbers from Pool
 
-Смарт-контракты для минта номеров из пула на блокчейне TON.
+Smart contracts for minting numbers from a pool on the TON blockchain.
 
-## Описание
+## Description
 
-Этот проект содержит упрощенную версию Telemint контрактов, оптимизированную для минта номеров из предопределенного пула. Используются контракты без DNS для экономии газа.
+This project contains a simplified version of Telemint contracts optimized for minting numbers from a predefined pool. DNS-free contracts are used to save gas.
 
-## Структура проекта
+## Project Structure
 
-- `func/contracts/` - исходный код смарт-контрактов:
-  - `nft-collection-no-dns.fc` - коллекция NFT без DNS
-  - `nft-item-no-dns-cheap.fc` - дешевый NFT item (0.03 TON вместо 1 TON)
-  - `imports/` - общие зависимости (common.fc, stdlib.fc)
-- `func/wrappers/` - TypeScript обертки для контрактов:
-  - `NftCollectionNoDns.ts` - обертка для коллекции
-  - `NftItemNoDnsCheap.ts` - обертка для NFT item
-- `func/helpers/` - helper функции для работы с контрактами:
-  - `auctionConfig.ts` - создание конфигурации аукциона
-  - `signMessage.ts` - создание и подпись сообщений
-  - `nftContent.ts` - создание NFT контента
-  - `royaltyParams.ts` - создание параметров роялти
-  - `restrictions.ts` - создание ограничений на отправителя
-- `func/examples/` - примеры использования:
-  - `backend-api.example.ts` - пример бэкенд API
-  - `frontend-mint.example.ts` - пример фронтенд кода
-- `func/tests/` - тесты для контрактов (см. [документацию по тестам](./docs/tests.md))
-- `docs/` - документация проекта:
-  - [MINT_FLOW.md](./docs/MINT_FLOW.md) - подробное описание флоу минта
-  - [tests.md](./docs/tests.md) - документация по тестам
+- `func/contracts/` - smart contract source code:
+  - `nft-collection-no-dns.fc` - NFT collection without DNS
+  - `nft-item-no-dns-cheap.fc` - cheap NFT item (0.03 TON instead of 1 TON)
+  - `imports/` - common dependencies (common.fc, stdlib.fc)
+- `func/wrappers/` - TypeScript wrappers for contracts:
+  - `NftCollectionNoDns.ts` - collection wrapper
+  - `NftItemNoDnsCheap.ts` - NFT item wrapper
+- `func/helpers/` - helper functions for working with contracts:
+  - `auctionConfig.ts` - auction configuration creation
+  - `signMessage.ts` - message creation and signing
+  - `nftContent.ts` - NFT content creation
+  - `royaltyParams.ts` - royalty parameters creation
+  - `restrictions.ts` - sender restrictions creation
+- `func/examples/` - usage examples:
+  - `backend-api.example.ts` - backend API example
+  - `frontend-mint.example.ts` - frontend code example
+- `func/tests/` - contract tests (see [test documentation](./docs/tests.md))
+- `docs/` - project documentation:
+  - [MINT_FLOW.md](./docs/MINT_FLOW.md) - detailed mint flow description
+  - [tests.md](./docs/tests.md) - test documentation
 
-## Используемые контракты
+## Contracts Used
 
-- **NftCollectionNoDns** - коллекция NFT без DNS. Используется для создания и управления NFT номерами.
-- **NftItemNoDnsCheap** - дешевый NFT item без DNS. Требует только 0.03 TON для хранения (вместо 1 TON в стандартной версии).
+- **NftCollectionNoDns** - NFT collection without DNS. Used for creating and managing NFT numbers.
+- **NftItemNoDnsCheap** - Cheap NFT item without DNS. Requires only 0.03 TON for storage (instead of 1 TON in the standard version).
 
-**Важно:** Контракт активируется только после получения первого сообщения от коллекции (при минте). После активации можно получать данные через get-методы:
+**Important:** The contract activates only after receiving the first message from the collection (during mint). After activation, data can be retrieved through get-methods:
 
 ```typescript
 const nftData = await nft.getNftData();
 if (nftData.init && nftData.content) {
     const parsedContent = parseNftContent(nftData.content);
-    // Используем parsedContent
+    // Use parsedContent
 }
 ```
 
-Подробнее об активации контрактов см. в [MINT_FLOW.md](./docs/MINT_FLOW.md#активация-nft-item-контракта).
+For more details on contract activation, see [MINT_FLOW.md](./docs/MINT_FLOW.md#nft-item-contract-activation).
 
-## Флоу минта
+## Mint Flow
 
-1. Пользователь заходит на бэкенд и нажимает "Получить номер"
-2. Бэкенд генерирует доступный номер из пула
-3. Бэкенд формирует пейлоад и подписывает сообщение
-4. Пользователь получает подписанное сообщение
-5. Пользователь отправляет транзакцию в блокчейн
-6. Контракт минтит NFT и отправляет пользователю
+1. User goes to the backend and clicks "Get Number"
+2. Backend generates an available number from the pool
+3. Backend forms the payload and signs the message
+4. User receives the signed message
+5. User sends the transaction to the blockchain
+6. Contract mints NFT and sends it to the user
 
-Подробное описание флоу см. в [docs/MINT_FLOW.md](./docs/MINT_FLOW.md).
+For detailed flow description, see [docs/MINT_FLOW.md](./docs/MINT_FLOW.md).
 
-## Быстрый старт
+## Quick Start
 
-### Установка зависимостей
+### Installing Dependencies
 
 ```bash
 cd func
 npm install
 ```
 
-### Сборка контрактов
+### Building Contracts
 
 ```bash
 npm run build
 ```
 
-### Тестирование
+### Testing
 
 ```bash
 npm test
 ```
 
-Подробнее о тестах см. [документацию по тестам](./docs/tests.md).
+For more details on tests, see [test documentation](./docs/tests.md).
 
-### Примеры использования
+### Usage Examples
 
-Примеры кода находятся в `func/examples/`:
-- `backend-api.example.ts` - как создать бэкенд API для генерации подписанных сообщений
-- `frontend-mint.example.ts` - как отправить транзакцию минта с фронтенда
+Code examples are located in `func/examples/`:
+- `backend-api.example.ts` - how to create a backend API for generating signed messages
+- `frontend-mint.example.ts` - how to send a mint transaction from the frontend
 
-Подробное описание флоу см. в [docs/MINT_FLOW.md](./docs/MINT_FLOW.md).
+For detailed flow description, see [docs/MINT_FLOW.md](./docs/MINT_FLOW.md).
 
-## Документация
+## Documentation
 
-- [Флоу минта](./docs/MINT_FLOW.md) - подробное описание процесса минта номеров из пула
-- [Тесты](./docs/tests.md) - описание тестов и покрытия функциональности
+- [Mint Flow](./docs/MINT_FLOW.md) - detailed description of the number minting process from the pool
+- [Tests](./docs/tests.md) - test description and functionality coverage
 
-## Helper функции
+## Helper Functions
 
-Все helper функции экспортируются из `func/helpers/index.ts`:
+All helper functions are exported from `func/helpers/index.ts`:
 
 ```typescript
 import {
@@ -107,8 +107,8 @@ import {
 } from './helpers';
 ```
 
-Подробнее см. документацию в файлах helper функций и [MINT_FLOW.md](./docs/MINT_FLOW.md#использование-helper-функций).
+For more details, see documentation in helper function files and [MINT_FLOW.md](./docs/MINT_FLOW.md#using-helper-functions).
 
-## Лицензия
+## License
 
-См. [LICENSE](./LICENSE)
+See [LICENSE](./LICENSE)

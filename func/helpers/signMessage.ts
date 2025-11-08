@@ -5,15 +5,15 @@ export type UnsignedDeployMessageV2 = {
     subwalletId: number;
     validSince: number; // Unix timestamp
     validTill: number; // Unix timestamp
-    tokenName: string; // Номер из пула
-    content: Cell; // NFT контент
+    tokenName: string; // Number from pool
+    content: Cell; // NFT content
     auctionConfig: Cell;
     royaltyParams?: Cell;
     restrictions?: Cell;
 };
 
 /**
- * Создает unsigned deploy message v2 (для NftCollectionNoDns)
+ * Creates unsigned deploy message v2 (for NftCollectionNoDns)
  */
 export function createUnsignedDeployMessageV2(params: UnsignedDeployMessageV2): Cell {
     const {
@@ -41,7 +41,7 @@ export function createUnsignedDeployMessageV2(params: UnsignedDeployMessageV2): 
 }
 
 /**
- * Подписывает unsigned deploy message
+ * Signs unsigned deploy message
  */
 export function signDeployMessage(
     unsignedMessage: Cell,
@@ -52,7 +52,7 @@ export function signDeployMessage(
 }
 
 /**
- * Создает полное подписанное сообщение для отправки в контракт
+ * Creates complete signed message for sending to contract
  */
 export function createSignedDeployMessageV2(
     unsignedMessage: Cell,

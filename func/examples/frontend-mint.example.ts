@@ -1,21 +1,21 @@
 /**
- * Пример фронтенд кода для отправки транзакции минта
+ * Frontend code example for sending mint transaction
  * 
- * Этот файл показывает, как отправить подписанное сообщение
- * в контракт для минта NFT номера
+ * This file shows how to send signed message
+ * to contract for minting NFT number
  */
 
 import { Address, Cell, fromNano, internal } from '@ton/core';
 import { TonClient, WalletContractV4 } from '@ton/ton';
 import { mnemonicToWalletKey } from '@ton/crypto';
 
-// Конфигурация
+// Configuration
 const BACKEND_API_URL = 'https://your-backend.com/api';
 const COLLECTION_ADDRESS = Address.parse('YOUR_COLLECTION_ADDRESS');
-const TON_API_KEY = 'YOUR_TON_API_KEY'; // Для mainnet/testnet
+const TON_API_KEY = 'YOUR_TON_API_KEY'; // For mainnet/testnet
 
 /**
- * Типы ответов от бэкенда
+ * Backend response types
  */
 type PrepareMintResponse = {
     unsignedMessage: string; // base64 encoded Cell
@@ -27,7 +27,7 @@ type PrepareMintResponse = {
 };
 
 /**
- * Шаг 1: Получение подписанного сообщения от бэкенда
+ * Step 1: Get signed message from backend
  */
 async function prepareMint(userAddress: string): Promise<PrepareMintResponse> {
     const response = await fetch(`${BACKEND_API_URL}/mint/prepare`, {
@@ -47,7 +47,7 @@ async function prepareMint(userAddress: string): Promise<PrepareMintResponse> {
 }
 
 /**
- * Шаг 2: Отправка транзакции в блокчейн
+ * Step 2: Send transaction to blockchain
  */
 async function sendMintTransaction(
     signedMessageBase64: string,
@@ -56,16 +56,16 @@ async function sendMintTransaction(
     client: TonClient,
     secretKey: Buffer
 ): Promise<string> {
-    // Парсим подписанное сообщение (из base64)
+    // Parse signed message (from base64)
     const signedMessage = Cell.fromBase64(signedMessageBase64);
 
-    // Открываем кошелек
+    // Open wallet
     const wallet = client.open(walletContract);
 
-    // Отправляем транзакцию через кошелек
+    // Send transaction through wallet
     const seqno = await wallet.getSeqno();
     
-    // Создаем сообщение для отправки
+    // Create message to send
     await wallet.sendTransfer({
         secretKey: secretKey,
         seqno,
@@ -76,20 +76,20 @@ async function sendMintTransaction(
         })],
     });
 
-    // Ждем подтверждения транзакции
+    // Wait for transaction confirmation
     let currentSeqno = await wallet.getSeqno();
     while (currentSeqno === seqno) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         currentSeqno = await wallet.getSeqno();
     }
 
-    // В реальном приложении здесь нужно получить hash транзакции
-    // из последней транзакции кошелька
+    // In real app here should get transaction hash
+    // from last wallet transaction
     return 'tx_hash_here';
 }
 
 /**
- * Шаг 3: Подтверждение успешного минта на бэкенде
+ * Step 3: Confirm successful mint on backend
  */
 async function confirmMint(tokenName: string, txHash: string): Promise<void> {
     await fetch(`${BACKEND_API_URL}/mint/confirm`, {
@@ -102,13 +102,13 @@ async function confirmMint(tokenName: string, txHash: string): Promise<void> {
 }
 
 /**
- * Полный флоу минта номера
+ * Complete number minting flow
  */
 export async function mintNumber(
     userMnemonic: string[],
     userAddress: string
 ): Promise<{ tokenName: string; txHash: string }> {
-    // 1. Инициализация клиента и кошелька
+    // 1. Initialize client and wallet
     const client = new TonClient({
         endpoint: `https://toncenter.com/api/v2/jsonRPC?api_key=${TON_API_KEY}`,
     });
@@ -117,19 +117,19 @@ export async function mintNumber(
     const walletContract = WalletContractV4.create({ publicKey: key.publicKey, workchain: 0 });
     const wallet = client.open(walletContract);
 
-    // 2. Получаем подписанное сообщение от бэкенда
+    // 2. Get signed message from backend
     console.log('Step 1: Preparing mint message...');
     const prepareResult = await prepareMint(userAddress);
     console.log(`Got number: ${prepareResult.tokenName}`);
     console.log(`Mint price: ${fromNano(prepareResult.mintPrice)} TON`);
 
-    // 3. Проверяем баланс кошелька
+    // 3. Check wallet balance
     const balance = await wallet.getBalance();
     if (balance < BigInt(prepareResult.mintPrice)) {
         throw new Error(`Insufficient balance. Need ${fromNano(prepareResult.mintPrice)} TON`);
     }
 
-    // 4. Отправляем транзакцию
+    // 4. Send transaction
     console.log('Step 2: Sending mint transaction...');
     const txHash = await sendMintTransaction(
         prepareResult.signedMessage,
@@ -140,7 +140,7 @@ export async function mintNumber(
     );
     console.log(`Transaction sent: ${txHash}`);
 
-    // 5. Подтверждаем минт на бэкенде
+    // 5. Confirm mint on backend
     console.log('Step 3: Confirming mint...');
     await confirmMint(prepareResult.tokenName, txHash);
     console.log('Mint confirmed!');
@@ -152,7 +152,7 @@ export async function mintNumber(
 }
 
 /**
- * Пример использования в React компоненте:
+ * Usage example in React component:
  * 
  * import { useState } from 'react';
  * 
@@ -163,8 +163,8 @@ export async function mintNumber(
  *   const handleMint = async () => {
  *     setLoading(true);
  *     try {
- *       const userMnemonic = getStoredMnemonic(); // Получить из безопасного хранилища
- *       const userAddress = getWalletAddress(); // Адрес кошелька пользователя
+ *       const userMnemonic = getStoredMnemonic(); // Get from secure storage
+ *       const userAddress = getWalletAddress(); // User wallet address
  *       
  *       const result = await mintNumber(userMnemonic, userAddress);
  *       setResult(`Successfully minted number ${result.tokenName}!`);

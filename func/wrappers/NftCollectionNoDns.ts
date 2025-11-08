@@ -72,11 +72,11 @@ export class NftCollectionNoDns implements Contract {
 
         const msg = beginCell()
             .storeUint(0x4637289b, 32) // op::telemint_msg_deploy_v2
-            .storeBuffer(opts.signature) // signature (512 бит = 64 байта)
+            .storeBuffer(opts.signature) // signature (512 bits = 64 bytes)
             .storeUint(opts.subwalletId, 32)
             .storeUint(opts.validSince, 32)
             .storeUint(opts.validTill, 32)
-            .storeSlice(cmd.beginParse()) // cmd как slice (не ref!)
+            .storeSlice(cmd.beginParse()) // cmd as slice (not ref!)
             .endCell();
 
         await provider.internal(via, {

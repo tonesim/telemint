@@ -2,42 +2,42 @@ import { Address, beginCell, Cell, toNano } from '@ton/core';
 
 export type AuctionConfigParams = {
     beneficiaryAddress: Address;
-    initialMinBid: bigint; // Минимальная ставка (цена минта)
-    maxBid?: bigint; // Максимальная ставка (если = initialMinBid, аукцион сразу завершится)
-    minBidStep?: number; // Минимальный шаг ставки в процентах (1-255)
-    minExtendTime?: number; // Минимальное время продления аукциона в секундах
-    duration?: number; // Длительность аукциона в секундах
+    initialMinBid: bigint; // Minimum bid (mint price)
+    maxBid?: bigint; // Maximum bid (if = initialMinBid, auction completes immediately)
+    minBidStep?: number; // Minimum bid step in percent (1-255)
+    minExtendTime?: number; // Minimum auction extension time in seconds
+    duration?: number; // Auction duration in seconds
 };
 
 /**
- * Создает auction config для прямого минта (без аукциона)
- * Аукцион сразу завершится после первой ставки
+ * Creates auction config for direct mint (without auction)
+ * Auction completes immediately after first bid
  */
 export function createDirectMintAuctionConfig(params: {
     beneficiaryAddress: Address;
-    mintPrice: bigint; // Цена минта
+    mintPrice: bigint; // Mint price
 }): Cell {
     return createAuctionConfig({
         beneficiaryAddress: params.beneficiaryAddress,
         initialMinBid: params.mintPrice,
-        maxBid: params.mintPrice, // Аукцион сразу завершится
+        maxBid: params.mintPrice, // Auction completes immediately
         minBidStep: 1,
         minExtendTime: 0,
-        duration: 0, // Аукцион сразу завершится
+        duration: 0, // Auction completes immediately
     });
 }
 
 /**
- * Создает auction config для обычного аукциона
+ * Creates auction config for regular auction
  */
 export function createAuctionConfig(params: AuctionConfigParams): Cell {
     const {
         beneficiaryAddress,
         initialMinBid,
-        maxBid = 0n, // 0 = без лимита
-        minBidStep = 5, // 5% по умолчанию
-        minExtendTime = 300, // 5 минут по умолчанию
-        duration = 86400, // 1 день по умолчанию
+        maxBid = 0n, // 0 = no limit
+        minBidStep = 5, // 5% by default
+        minExtendTime = 300, // 5 minutes by default
+        duration = 86400, // 1 day by default
     } = params;
 
     return beginCell()

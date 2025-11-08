@@ -82,7 +82,7 @@ async function waitForNftActivation(
         if (await isNftActivated(nft)) {
             return true;
         }
-        // Небольшая задержка для обработки транзакций в sandbox
+        // Small delay for transaction processing in sandbox
         await new Promise(resolve => setTimeout(resolve, 100));
     }
 
@@ -261,7 +261,7 @@ describe('NftItemNoDnsCheap', () => {
         });
 
         it('should get auction config', async () => {
-            // Arrange: Проверяем активацию
+            // Arrange: Check activation
             const isActivated = await isNftActivated(nft);
             if (!isActivated) {
                 console.warn('NFT contract not activated, skipping test.');
@@ -271,8 +271,8 @@ describe('NftItemNoDnsCheap', () => {
             const auctionConfigData = await nft.getTelemintAuctionConfig();
 
             expect(auctionConfigData.beneficiaryAddress).toBeDefined();
-            // При прямом минте (createDirectMintAuctionConfig) аукцион сразу завершается,
-            // но конфигурация все еще доступна. initialMinBid должен быть равен mintPrice
+            // With direct mint (createDirectMintAuctionConfig) auction completes immediately,
+            // but config is still available. initialMinBid should equal mintPrice
             expect(auctionConfigData.initialMinBid).toBeGreaterThanOrEqual(0n);
         });
 
@@ -314,10 +314,10 @@ describe('NftItemNoDnsCheap', () => {
             const auctionConfig = createAuctionConfig({
                 beneficiaryAddress: owner.address,
                 initialMinBid: mintPrice,
-                maxBid: 0n, // Без лимита
+                maxBid: 0n, // No limit
                 minBidStep: 5,
                 minExtendTime: 300,
-                duration: 3600, // 1 час
+                duration: 3600, // 1 hour
             });
             const royaltyParams = createNoRoyaltyParams(owner.address);
 
@@ -529,7 +529,7 @@ describe('NftItemNoDnsCheap', () => {
         it('should allow owner to transfer NFT', async () => {
             const nftData = await nft.getNftData();
             if (!nftData.ownerAddress) {
-                return; // NFT еще не имеет владельца
+                return; // NFT doesn't have owner yet
             }
 
             const transferOp = beginCell()
@@ -578,22 +578,22 @@ describe('NftItemNoDnsCheap', () => {
                     expect(transferResult.transactions.length).toBeGreaterThan(0);
                 }
             } catch (e: any) {
-                // Контракт может быть не активирован или операция отклонена
+                // Contract may not be activated or operation rejected
                 expect(e.message).toContain('non-active contract');
             }
         });
 
         it('should reject transfer when auction is active', async () => {
-            // Arrange: Создаем NFT с активным аукционом
+            // Arrange: Create NFT with active auction
             const tokenNameAuction = 'transfer-auction-test';
             const mintPrice = toNano('0.1');
             const auctionConfig = createAuctionConfig({
                 beneficiaryAddress: owner.address,
                 initialMinBid: mintPrice,
-                maxBid: 0n, // Без лимита
+                maxBid: 0n, // No limit
                 minBidStep: 5,
                 minExtendTime: 300,
-                duration: 3600, // 1 час
+                duration: 3600, // 1 hour
             });
             const royaltyParams = createNoRoyaltyParams(owner.address);
 
@@ -614,7 +614,7 @@ describe('NftItemNoDnsCheap', () => {
             try {
                 const nftData = await nftAuction.getNftData();
                 if (nftData.init && nftData.ownerAddress) {
-                    // Проверяем, что аукцион активен
+                    // Check that auction is active
                     const auctionState = await nftAuction.getTelemintAuctionState();
                     if (auctionState.endTime > 0) {
                         const transferOp = beginCell()
@@ -632,16 +632,16 @@ describe('NftItemNoDnsCheap', () => {
                             body: transferOp,
                         });
 
-                        // Если аукцион активен, transfer должен быть отклонен
-                        // Проверяем, что транзакция не прошла успешно или вернула ошибку
+                        // If auction is active, transfer should be rejected
+                        // Check that transaction didn't succeed or returned error
                         expect(transferResult.transactions.length).toBeGreaterThan(0);
                     } else {
-                        // Аукцион уже завершен, transfer должен пройти
+                        // Auction already completed, transfer should be allowed
                         console.warn('Auction already completed, transfer should be allowed');
                     }
                 }
             } catch (e: any) {
-                // Ожидаем либо ошибку о неактивном контракте, либо ошибку о активном аукционе, либо ошибку с адресом
+                // Expect either error about non-active contract, or error about active auction, or address error
                 expect(e.message).toMatch(/non-active contract|auction|Invalid address/);
             }
         });
@@ -749,8 +749,8 @@ describe('NftItemNoDnsCheap', () => {
             try {
                 const nftData = await nft.getNftData();
                 if (nftData.init && nftData.ownerAddress) {
-                    // При прямом минте (createDirectMintAuctionConfig) аукцион сразу завершается
-                    // Поэтому можно запустить новый аукцион
+                    // With direct mint (createDirectMintAuctionConfig) auction completes immediately
+                    // So we can start a new auction
                     const newAuctionConfig = createAuctionConfig({
                         beneficiaryAddress: owner.address,
                         initialMinBid: toNano('0.2'),
@@ -773,12 +773,12 @@ describe('NftItemNoDnsCheap', () => {
 
                     expect(startResult.transactions.length).toBeGreaterThan(0);
 
-                    // Проверяем, что аукцион запущен
+                    // Check that auction is started
                     const auctionState = await nft.getTelemintAuctionState();
                     expect(auctionState.minBid).toBeGreaterThan(0n);
                 }
             } catch (e: any) {
-                // Ожидаем либо ошибку о неактивном контракте, либо ошибку о том, что аукцион уже существует
+                // Expect either error about non-active contract, or error that auction already exists
                 expect(e.message).toMatch(/non-active contract|no auction|exit_code: 219/);
             }
         });
@@ -811,7 +811,7 @@ describe('NftItemNoDnsCheap', () => {
                     expect(startResult.transactions.length).toBeGreaterThan(0);
                 }
             } catch (e: any) {
-                // Контракт может быть н активирован или операция отклонена
+                // Contract may not be activated or operation rejected
                 expect(e.message).toContain('non-active contract');
             }
         });
@@ -822,7 +822,7 @@ describe('NftItemNoDnsCheap', () => {
                 if (nftData.init && nftData.ownerAddress) {
                     const invalidAuctionConfig = createAuctionConfig({
                         beneficiaryAddress: owner.address,
-                        initialMinBid: toNano('0.001'), // Слишком мало
+                        initialMinBid: toNano('0.001'), // Too low
                         maxBid: 0n,
                         minBidStep: 5,
                         minExtendTime: 300,
@@ -1000,7 +1000,7 @@ describe('NftItemNoDnsCheap', () => {
                 const nftData = await nft.getNftData();
                 if (nftData.init) {
                     const unknownOp = beginCell()
-                        .storeUint(0xdeadbeef, 32) // Неизвестный op code
+                        .storeUint(0xdeadbeef, 32) // Unknown op code
                         .storeUint(0, 64)
                         .endCell();
 

@@ -1,10 +1,10 @@
-# Флоу минта номеров из пула
+# Mint Flow for Numbers from Pool
 
-Этот документ описывает полный флоу минта номеров из пула с использованием контрактов `NftCollectionNoDns` и `NftItemNoDnsCheap`.
+This document describes the complete flow for minting numbers from a pool using `NftCollectionNoDns` and `NftItemNoDnsCheap` contracts.
 
-> 📚 См. также: [README](../README.md) | [Документация по тестам](./tests.md)
+> 📚 See also: [README](../README.md) | [Test Documentation](./tests.md)
 
-## Архитектура
+## Architecture
 
 ```
 ┌─────────────┐         ┌──────────────┐         ┌─────────────┐
@@ -13,25 +13,25 @@
 └─────────────┘         └──────────────┘         └─────────────┘
 ```
 
-## Важные замечания о работе с NFT item
+## Important Notes on NFT Item Operations
 
-### Активация NFT item контракта
+### NFT Item Contract Activation
 
-NFT item контракт активируется только после получения первого сообщения от коллекции. Это происходит следующим образом:
+The NFT item contract activates only after receiving the first message from the collection. This happens as follows:
 
-1. **При минте**: Коллекция отправляет internal message к NFT item с операцией `op::teleitem_msg_deploy`
-2. **Активация**: NFT item получает это сообщение и сохраняет state (данные контракта)
-3. **Доступность**: Только после активации можно вызывать get-методы контракта
+1. **During mint**: Collection sends an internal message to NFT item with operation `op::teleitem_msg_deploy`
+2. **Activation**: NFT item receives this message and saves state (contract data)
+3. **Availability**: Only after activation can get-methods be called on the contract
 
-**В реальной сети:**
-- Контракт активируется синхронно в той же транзакции, что и минт
-- Данные доступны сразу после подтверждения транзакции
+**In production network:**
+- Contract activates synchronously in the same transaction as mint
+- Data is available immediately after transaction confirmation
 
-**В sandbox/тестах:**
-- Может потребоваться дополнительное время для обработки сообщения
-- Рекомендуется использовать try-catch или проверять `init` флаг из `get_nft_data()`
+**In sandbox/tests:**
+- Additional time may be required for message processing
+- It's recommended to use try-catch or check the `init` flag from `get_nft_data()`
 
-**Пример получения данных NFT item:**
+**Example of retrieving NFT item data:**
 
 ```typescript
 const nft = blockchain.openContract(NftItemNoDnsCheap.createFromAddress(nftAddress));
@@ -39,42 +39,42 @@ const nft = blockchain.openContract(NftItemNoDnsCheap.createFromAddress(nftAddre
 try {
     const nftData = await nft.getNftData();
     
-    // Проверяем, что контракт активирован
+    // Check that contract is activated
     if (nftData.init && nftData.content) {
-        // Парсим content из Cell
+        // Parse content from Cell
         const parsedContent = parseNftContent(nftData.content);
         console.log('NFT Content:', parsedContent);
     }
 } catch (e) {
-    // Контракт еще не активирован - это нормально
-    // В продакшене подождите подтверждения транзакции
+    // Contract not yet activated - this is normal
+    // In production, wait for transaction confirmation
 }
 ```
 
-## Шаги флоу
+## Flow Steps
 
-### 1. Пользователь нажимает "Получить номер"
+### 1. User Clicks "Get Number"
 
-Пользователь заходит на фронтенд и нажимает кнопку "Получить номер".
+User goes to the frontend and clicks the "Get Number" button.
 
-### 2. Бэкенд генерирует доступный номер
+### 2. Backend Generates Available Number
 
-Бэкенд проверяет пул доступных номеров и выбирает свободный номер. Номер резервируется на время валидности подписи.
+Backend checks the pool of available numbers and selects a free number. The number is reserved for the signature validity period.
 
-**Пример:**
+**Example:**
 ```typescript
 const number = getAvailableNumber(); // "123456"
 ```
 
-### 3. Бэкенд формирует пейлоад
+### 3. Backend Forms Payload
 
-Бэкенд создает:
-- NFT контент (метаданные номера)
-- Auction config (для прямого минта без аукциона)
-- Royalty params (параметры роялти)
-- Restrictions (ограничения на отправителя, опционально)
+Backend creates:
+- NFT content (number metadata)
+- Auction config (for direct mint without auction)
+- Royalty params (royalty parameters)
+- Restrictions (sender restrictions, optional)
 
-**Пример:**
+**Example:**
 ```typescript
 const nftContent = createNumberNftContent(number);
 const auctionConfig = createDirectMintAuctionConfig({
@@ -83,23 +83,23 @@ const auctionConfig = createDirectMintAuctionConfig({
 });
 const royaltyParams = createNoRoyaltyParams(BENEFICIARY_ADDRESS);
 const restrictions = createRestrictions({
-    forceSenderAddress: userAddress, // Только этот пользователь может минтить
+    forceSenderAddress: userAddress, // Only this user can mint
 });
 ```
 
-### 4. Бэкенд создает unsigned deploy message
+### 4. Backend Creates Unsigned Deploy Message
 
-Бэкенд формирует unsigned deploy message v2 с параметрами:
-- `subwalletId` - ID subwallet коллекции
-- `validSince` - начало валидности подписи
-- `validTill` - конец валидности подписи
-- `tokenName` - номер из пула
-- `content` - NFT контент
-- `auctionConfig` - конфигурация аукциона
-- `royaltyParams` - параметры роялти
-- `restrictions` - ограничения
+Backend forms unsigned deploy message v2 with parameters:
+- `subwalletId` - Collection subwallet ID
+- `validSince` - Signature validity start
+- `validTill` - Signature validity end
+- `tokenName` - Number from pool
+- `content` - NFT content
+- `auctionConfig` - Auction configuration
+- `royaltyParams` - Royalty parameters
+- `restrictions` - Restrictions
 
-**Пример:**
+**Example:**
 ```typescript
 const unsignedMessage = createUnsignedDeployMessageV2({
     subwalletId: 0,
@@ -113,23 +113,23 @@ const unsignedMessage = createUnsignedDeployMessageV2({
 });
 ```
 
-### 5. Бэкенд подписывает сообщение
+### 5. Backend Signs Message
 
-Бэкенд подписывает hash unsigned message приватным ключом коллекции.
+Backend signs the hash of the unsigned message with the collection's private key.
 
-**Пример:**
+**Example:**
 ```typescript
 const signature = signDeployMessage(unsignedMessage, privateKey);
 const signedMessage = createSignedDeployMessageV2(unsignedMessage, signature);
 ```
 
-### 6. Бэкенд отправляет подписанное сообщение пользователю
+### 6. Backend Sends Signed Message to User
 
-Бэкенд возвращает пользователю:
-- Подписанное сообщение (hex)
-- Номер
-- Цену минта
-- Время валидности подписи
+Backend returns to the user:
+- Signed message (hex)
+- Number
+- Mint price
+- Signature validity time
 
 **API Response:**
 ```json
@@ -141,14 +141,14 @@ const signedMessage = createSignedDeployMessageV2(unsignedMessage, signature);
 }
 ```
 
-### 7. Пользователь отправляет транзакцию
+### 7. User Sends Transaction
 
-Фронтенд отправляет транзакцию в блокчейн:
-- Адрес получателя: адрес коллекции
-- Сумма: цена минта
-- Тело: подписанное сообщение
+Frontend sends transaction to blockchain:
+- Recipient address: collection address
+- Amount: mint price
+- Body: signed message
 
-**Пример:**
+**Example:**
 ```typescript
 await wallet.send({
     to: COLLECTION_ADDRESS,
@@ -157,67 +157,67 @@ await wallet.send({
 });
 ```
 
-### 8. Контракт минтит NFT
+### 8. Contract Mints NFT
 
-Контракт `NftCollectionNoDns`:
-1. Проверяет подпись
-2. Проверяет валидность временного окна
-3. Проверяет restrictions (если есть)
-4. Проверяет, что сумма >= initial_min_bid
-5. Создает NFT item контракт
-6. Запускает аукцион (который сразу завершается, т.к. max_bid = initial_min_bid)
-7. Передает NFT пользователю
+The `NftCollectionNoDns` contract:
+1. Verifies signature
+2. Checks validity time window
+3. Checks restrictions (if any)
+4. Checks that amount >= initial_min_bid
+5. Creates NFT item contract
+6. Starts auction (which immediately completes, as max_bid = initial_min_bid)
+7. Transfers NFT to user
 
-### 9. Подтверждение минта и получение данных NFT
+### 9. Mint Confirmation and NFT Data Retrieval
 
-После успешной транзакции фронтенд отправляет подтверждение на бэкенд, который помечает номер как заминтированный.
+After successful transaction, frontend sends confirmation to backend, which marks the number as minted.
 
-**Важно:** NFT item контракт активируется в той же транзакции, что и минт. После подтверждения транзакции можно получать данные NFT через get-методы контракта.
+**Important:** NFT item contract activates in the same transaction as mint. After transaction confirmation, NFT data can be retrieved through contract get-methods.
 
-**Пример получения данных NFT после минта:**
+**Example of retrieving NFT data after mint:**
 
 ```typescript
-// После подтверждения транзакции минта
+// After mint transaction confirmation
 import { parseNftContent } from './helpers/nftContent';
 
 const itemIndex = await stringHash(tokenName);
 const nftAddress = await collection.getNftAddressByIndex(itemIndex);
 const nft = client.open(NftItemNoDnsCheap.createFromAddress(nftAddress));
 
-// Получаем данные NFT
+// Get NFT data
 try {
     const nftData = await nft.getNftData();
     
-    // Проверяем, что контракт активирован
+    // Check that contract is activated
     if (nftData.init && nftData.content) {
-        // Парсим content из Cell
+        // Parse content from Cell
         const parsedContent = parseNftContent(nftData.content);
         console.log('NFT Number:', parsedContent.number);
         console.log('NFT Name:', parsedContent.name);
         
-        // Получаем имя токена напрямую
+        // Get token name directly
         const tokenName = await nft.getTelemintTokenName();
         console.log('Token Name:', tokenName);
     } else {
-        // Контракт еще не активирован - подождите подтверждения транзакции
+        // Contract not yet activated - wait for transaction confirmation
         console.log('NFT item not yet initialized');
     }
 } catch (e) {
-    // В sandbox контракт может быть еще не активирован
-    // В продакшене подождите подтверждения транзакции и повторите запрос
+    // In sandbox, contract may not be activated yet
+    // In production, wait for transaction confirmation and retry
     console.log('NFT item not yet activated');
 }
 ```
 
-**Рекомендации:**
-1. Дождитесь подтверждения транзакции минта (обычно 1-2 секунды)
-2. Проверяйте флаг `init` из `get_nft_data()` перед использованием данных
-3. Используйте try-catch для обработки случаев, когда контракт еще не активирован
-4. В продакшене можно использовать события транзакций для отслеживания активации
+**Recommendations:**
+1. Wait for mint transaction confirmation (usually 1-2 seconds)
+2. Check the `init` flag from `get_nft_data()` before using data
+3. Use try-catch to handle cases when contract is not yet activated
+4. In production, you can use transaction events to track activation
 
-## Использование helper функций
+## Using Helper Functions
 
-### Создание auction config для прямого минта
+### Creating Auction Config for Direct Mint
 
 ```typescript
 import { createDirectMintAuctionConfig } from './helpers/auctionConfig';
@@ -229,7 +229,7 @@ const auctionConfig = createDirectMintAuctionConfig({
 });
 ```
 
-### Создание NFT контента
+### Creating NFT Content
 
 ```typescript
 import { createNumberNftContent } from './helpers/nftContent';
@@ -239,7 +239,7 @@ const nftContent = createNumberNftContent('123456', {
 });
 ```
 
-### Создание подписанного сообщения
+### Creating Signed Message
 
 ```typescript
 import {
@@ -263,27 +263,27 @@ const signature = signDeployMessage(unsignedMessage, privateKey);
 const signedMessage = createSignedDeployMessageV2(unsignedMessage, signature);
 ```
 
-## Безопасность
+## Security
 
-### Важные моменты:
+### Important Points:
 
-1. **Приватный ключ** должен храниться в безопасном месте (env переменные, secrets manager)
-2. **Валидность подписи** должна быть ограничена по времени (рекомендуется 1 час)
-3. **Restrictions** позволяют ограничить, кто может использовать подпись
-4. **Пул номеров** должен проверяться на дубликаты
-5. **Подтверждение минта** должно происходить только после проверки транзакции в блокчейне
+1. **Private key** must be stored in a secure location (env variables, secrets manager)
+2. **Signature validity** should be time-limited (recommended: 1 hour)
+3. **Restrictions** allow limiting who can use the signature
+4. **Number pool** should be checked for duplicates
+5. **Mint confirmation** should only occur after verifying the transaction on blockchain
 
-## Примеры кода
+## Code Examples
 
-Полные примеры кода находятся в:
-- `../func/examples/backend-api.example.ts` - пример бэкенд API
-- `../func/examples/frontend-mint.example.ts` - пример фронтенд кода
+Full code examples are located in:
+- `../func/examples/backend-api.example.ts` - backend API example
+- `../func/examples/frontend-mint.example.ts` - frontend code example
 
-Подробнее о тестах см. [документацию по тестам](./tests.md).
+For more details on tests, see [test documentation](./tests.md).
 
-## Конфигурация контракта
+## Contract Configuration
 
-Для деплоя коллекции используйте:
+To deploy the collection, use:
 
 ```typescript
 import { NftCollectionNoDns } from './wrappers/NftCollectionNoDns';
@@ -303,28 +303,27 @@ const collection = NftCollectionNoDns.createFromConfig({
 }, collectionCode);
 ```
 
-## Минимальная цена минта
+## Minimum Mint Price
 
-Для `NftItemNoDnsCheap` минимальная цена минта:
+For `NftItemNoDnsCheap`, minimum mint price:
 - `cheap_min_tons_for_storage = 0.03 TON`
 - `cheap_minting_price = 0.03 TON`
-- **Итого минимум: 0.06 TON** (рекомендуется 0.1 TON для комиссий)
+- **Total minimum: 0.06 TON** (recommended 0.1 TON for fees)
 
 ## Troubleshooting
 
-### Ошибка "invalid signature"
-- Проверьте, что используется правильный приватный ключ
-- Проверьте, что подпись создана для правильного сообщения
+### Error "invalid signature"
+- Check that the correct private key is used
+- Check that signature is created for the correct message
 
-### Ошибка "expired signature"
-- Проверьте, что `validTill` > текущее время
-- Увеличьте окно валидности подписи
+### Error "expired signature"
+- Check that `validTill` > current time
+- Increase signature validity window
 
-### Ошибка "not_enough_funds"
-- Проверьте, что сумма транзакции >= `initial_min_bid`
-- Учтите комиссии сети
+### Error "not_enough_funds"
+- Check that transaction amount >= `initial_min_bid`
+- Account for network fees
 
-### Ошибка "invalid_sender_address"
-- Проверьте restrictions - возможно, указан `forceSenderAddress`
-- Убедитесь, что транзакцию отправляет правильный адрес
-
+### Error "invalid_sender_address"
+- Check restrictions - possibly `forceSenderAddress` is specified
+- Ensure transaction is sent from the correct address
