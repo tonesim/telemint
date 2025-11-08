@@ -1,4 +1,5 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode, toNano } from '@ton/core';
+import { Address, beginCell, Cell, Contract, contractAddress,
+    ContractProvider, Sender, SendMode, toNano } from '@ton/core';
 import { NftItem, NftItemConfig, nftItemConfigToCell } from './NftItem';
 
 export class NftItemNoDnsCheap extends NftItem {

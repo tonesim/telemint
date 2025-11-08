@@ -1,0 +1,160 @@
+# .cursor/rules
+
+## Тесты: общие принципы
+
+* Пиши поведение, не реализацию. Шаблон: AAA или Given–When–Then.
+* Один смысл на тест. Ясные имена: `should_<ожидание>`.
+* Тесты детерминированны. Время, сеть, случайность — замокать.
+* Тесты независимы. Порядок выполнения не важен.
+* Быстрые unit. Интеграционные и e2e — выборочно, по критическим путям.
+* Данные через фабрики/билдеры. Покрывай краевые случаи.
+* Мокай только внешние границы. Собственную логику — реальная.
+* TDD-дисциплина: красный → зелёный → рефакторинг.
+* Coverage — индикатор, не цель. Порог: 80–90% lines/branches.
+* Снепшоты только для стабильных структур/UI.
+* Параллельный прогон без конфликтов: изолированные БД, порты, tmp.
+* Flaky запрещены. Ретраи — временная мера, заводи тикет на причину.
+
+## Пирамида
+
+* Unit: чистые функции и сервисы без I/O.
+* Integration: реальные адаптеры (БД, брокер, Redis) в изоляции.
+* Contract: потребитель–поставщик (Pact) для внешних API.
+* E2E: минимум happy-path + критические ошибки.
+* Perf/Load: вне CI PR, но до релиза.
+
+## Структура теста
+
+```ts
+describe('Модуль/кейс', () => {
+  it('should <ожидание>', async () => {
+    // Arrange
+    // Act
+    // Assert
+  });
+});
+```
+
+## Данные и фикстуры
+
+* Фабрики: `makeUser(overrides?)`, `makeOrder(...)`.
+* Фиксируй Clock и Random.
+* Для БД: миграция один раз, далее — транзакция на тест и откат.
+
+## Моки и стабы
+
+* Мокай HTTP, FS, очередь, таймеры, UUID/Random.
+* Не мокай лёгкие утилиты и чистые функции.
+* Для Redis: namespace ключей в интеграционном окружении.
+
+## Контракты и схемы
+
+* DTO заверяй JSON Schema на входе и выходе.
+* Контракт-тесты между сервисами. Версионируй контракты.
+
+## Проверки ошибок
+
+* Тестируй не только happy-path: ошибки, таймауты, пустые входы.
+* Инварианты и guards — отдельными кейсами.
+
+## Антипаттерны
+
+* “Один тест всё проверяет”.
+* Моки глубоко внутри домена.
+* Ожидания на приватные методы.
+* Зависимость от реального времени/сети.
+* Огромные снепшоты.
+
+## Метрики качества
+
+* Coverage: lines/branches/functions ≥ 80–90% для критичных пакетов.
+* Mutation score (Stryker) ≥ 70% для ядра.
+* Flakiness = 0 в main.
+
+## CI/PR
+
+* Порядок: lint → typecheck → unit → integration (по метке/папке) → e2e.
+* Публикуй артефакты: coverage, junit, скриншоты e2e.
+* Тесты — часть “Definition of Done”.
+
+## NestJS + Prisma + Redis (правила генерации тестов)
+
+* Unit (Jest/Vitest): сервисы с замоканными репозиториями/клиентами. Фиксируй Clock/Random.
+* Integration (Prisma): Testcontainers или отдельная тест-БД. Миграции → транзакция на тест → откат.
+* Redis: unit — моки клиента; integration — ephemeral Redis с уникальным namespace.
+* E2E (NestJS): `@nestjs/testing` + `supertest`. Реальный HTTP. Внешние сервисы — замоканные или по контрактному серверу.
+
+## Обязательные кейсы
+
+* Края: пустые коллекции, max длины, дубликаты, null/undefined.
+* Идемпотентность, ретраи, дедупликация.
+* Транзакционные инварианты “всё или ничего”.
+* Конкурентность: два параллельных апдейта одного ресурса.
+* Безопасность: авторизация, запрет изменений защищённых полей.
+* Локализация/кодировки.
+* Миграции БД: `up`/`down` на пустой и на существующей схеме.
+
+## Быстрые правила
+
+* Каждый найденный баг — новый тест.
+* Любая новая публичная функция — с тестом.
+* Любое изменение контракта — обнови контракт-тесты.
+* Время прогона в PR держать ≤ 5 минут. Дольше — шардируй или выноси тяжёлые тесты.
+
+## Инструменты (рекомендации)
+
+* Раннер: Vitest или Jest.
+* E2E: Supertest; для фронта — Playwright.
+* Контейнеры: Testcontainers.
+* Ковередж: Istanbul.
+* Мутации: Stryker.
+* Контракты: Pact.
+* Фабрики: fishery/test-data-bot или собственные билдеры.
+
+## Шаблон unit-теста (NestJS)
+
+```ts
+import { Test } from '@nestjs/testing';
+import { MyService } from './my.service';
+import { Repo } from './repo';
+
+describe('MyService', () => {
+  it('should create user with normalized email', async () => {
+    const repo: Partial<Repo> = { create: vi.fn().mockResolvedValue({ id: 1 }) }; // jest.fn() если Jest
+    const module = await Test.createTestingModule({
+      providers: [MyService, { provide: Repo, useValue: repo }],
+    }).compile();
+
+    const svc = module.get(MyService);
+    await expect(svc.create({ email: 'A@a.COM' })).resolves.toEqual({ id: 1 });
+    expect(repo.create).toHaveBeenCalledWith({ email: 'a@a.com' });
+  });
+});
+```
+
+## Шаблон e2e (NestJS + supertest)
+
+```ts
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+
+describe('App E2E', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('GET /health should return ok', async () => {
+    await request(app.getHttpServer()).get('/health').expect(200).expect({ status: 'ok' });
+  });
+});
+```

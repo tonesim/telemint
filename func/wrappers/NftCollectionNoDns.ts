@@ -1,4 +1,5 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode, toNano } from '@ton/core';
+import { Address, beginCell, Cell, Contract, contractAddress,
+    ContractProvider, Sender, SendMode, toNano } from '@ton/core';
 
 export type NftCollectionNoDnsConfig = {
     touched: boolean;
@@ -60,10 +61,7 @@ export class NftCollectionNoDns implements Contract {
             restrictions?: Cell;
         }
     ) {
-        const unsignedDeploy = beginCell()
-            .storeUint(opts.subwalletId, 32)
-            .storeUint(opts.validSince, 32)
-            .storeUint(opts.validTill, 32)
+        const cmd = beginCell()
             .storeUint(opts.tokenName.length, 8)
             .storeStringTail(opts.tokenName)
             .storeRef(opts.content)
@@ -74,8 +72,11 @@ export class NftCollectionNoDns implements Contract {
 
         const msg = beginCell()
             .storeUint(0x4637289b, 32) // op::telemint_msg_deploy_v2
-            .storeBuffer(opts.signature)
-            .storeRef(unsignedDeploy)
+            .storeBuffer(opts.signature) // signature (512 бит = 64 байта)
+            .storeUint(opts.subwalletId, 32)
+            .storeUint(opts.validSince, 32)
+            .storeUint(opts.validTill, 32)
+            .storeSlice(cmd.beginParse()) // cmd как slice (не ref!)
             .endCell();
 
         await provider.internal(via, {
@@ -93,12 +94,12 @@ export class NftCollectionNoDns implements Contract {
         });
     }
 
-    async getCollectionData(provider: ContractProvider): Promise<{ index: number; collectionContent: Cell; ownerAddress: Address }> {
+    async getCollectionData(provider: ContractProvider): Promise<{ index: number; collectionContent: Cell; ownerAddress: Address | null }> {
         const result = await provider.get('get_collection_data', []);
         return {
             index: result.stack.readNumber(),
             collectionContent: result.stack.readCell(),
-            ownerAddress: result.stack.readAddress(),
+            ownerAddress: result.stack.readAddressOpt(),
         };
     }
 
@@ -115,6 +116,14 @@ export class NftCollectionNoDns implements Contract {
             { type: 'int', value: index },
         ]);
         return result.stack.readAddress();
+    }
+
+    async getNftContentByIndex(provider: ContractProvider, index: bigint): Promise<Cell> {
+        const result = await provider.get('get_nft_address_by_index', [
+            { type: 'int', value: index },
+        ]);
+
+        return result.stack.readCell();
     }
 
     async getNftContent(provider: ContractProvider, index: bigint, individualNftContent: Cell): Promise<Cell> {

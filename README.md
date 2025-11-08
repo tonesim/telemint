@@ -1,62 +1,114 @@
-# Telemint
-This is the smart contract that Telegram intends to use in order to put some of its best usernames up for auction. The blockchain network for this smart contract is The Open Network (https://ton.org).
+# Telemint - Mint Numbers from Pool
 
-Anyone who finds serious security vulnerabilities in this smart contract prior to the auction launch will be rewarded.
+Смарт-контракты для минта номеров из пула на блокчейне TON.
 
-## Description
-There are two smart contracts in the repository: NftCollection and NftItem.
+## Описание
 
-NftCollection source files: [nft-collection.fc](func/nft-collection.fc), [common.fc](func/common.fc) [stdlib.fc](func/stdlib.fc).
+Этот проект содержит упрощенную версию Telemint контрактов, оптимизированную для минта номеров из предопределенного пула. Используются контракты без DNS для экономии газа.
 
-NftItem source files: [nft-item.fc](func/nft-item.fc), [common.fc](func/common.fc) [stdlib.fc](func/stdlib.fc).
+## Структура проекта
 
-One may also look at the [tlb decription](telemint.tlb) of internal messages and smart contract data.
+- `func/contracts/` - исходный код смарт-контрактов:
+  - `nft-collection-no-dns.fc` - коллекция NFT без DNS
+  - `nft-item-no-dns-cheap.fc` - дешевый NFT item (0.03 TON вместо 1 TON)
+  - `imports/` - общие зависимости (common.fc, stdlib.fc)
+- `func/wrappers/` - TypeScript обертки для контрактов:
+  - `NftCollectionNoDns.ts` - обертка для коллекции
+  - `NftItemNoDnsCheap.ts` - обертка для NFT item
+- `func/helpers/` - helper функции для работы с контрактами:
+  - `auctionConfig.ts` - создание конфигурации аукциона
+  - `signMessage.ts` - создание и подпись сообщений
+  - `nftContent.ts` - создание NFT контента
+  - `royaltyParams.ts` - создание параметров роялти
+  - `restrictions.ts` - создание ограничений на отправителя
+- `func/examples/` - примеры использования:
+  - `backend-api.example.ts` - пример бэкенд API
+  - `frontend-mint.example.ts` - пример фронтенд кода
+- `func/tests/` - тесты для контрактов (см. [документацию по тестам](./docs/tests.md))
+- `docs/` - документация проекта:
+  - [MINT_FLOW.md](./docs/MINT_FLOW.md) - подробное описание флоу минта
+  - [tests.md](./docs/tests.md) - документация по тестам
 
-There are also two additional smart contracts in the repository: NftCollectionNoDns and NftItemNoDns. They do not support DNS and allow to set additional restrictions on first bid.
+## Используемые контракты
 
-NftCollectionNoDns source files: [nft-collection-no-dns.fc](func/nft-collection-no-dns.fc), [common.fc](func/common.fc) [stdlib.fc](func/stdlib.fc).
+- **NftCollectionNoDns** - коллекция NFT без DNS. Используется для создания и управления NFT номерами.
+- **NftItemNoDnsCheap** - дешевый NFT item без DNS. Требует только 0.03 TON для хранения (вместо 1 TON в стандартной версии).
 
-NftItemNoDns source files: [nft-item-no-dns.fc](func/nft-item-no-dns.fc), [common.fc](func/common.fc) [stdlib.fc](func/stdlib.fc).
+**Важно:** Контракт активируется только после получения первого сообщения от коллекции (при минте). После активации можно получать данные через get-методы:
 
-### NftCollection
-
-#### Internal messages
-The first bidder receives a signed query from the server and sends it to NftCollection with the first bid attached.
-```
-// Create an NftItem and start an auction. Signed by auction's private key. Acts as a first bid in the auction.
-telemint_unsigned_deploy$_ subwallet_id:uint32 valid_since:uint32 valid_till:uint32 token_name:TelemintText
-  content:^Cell auction_config:^TeleitemAuctionConfig royalty_params:(Maybe ^NftRoyaltyParams) = TelemintUnsignedDeploy;
-telemint_msg_deploy#4637289a  sig:bits512 msg:TelemintUnsignedDeploy = TelemintMsg;
-```
-
-The NftCollection interface is also supported.
-
-#### External messages
-The smart contract will accept the first external message to simplify the initialization of the smart contract.
-
-### NftItem
-
-#### Internal messages
-The first bid is made through NftCollection, which will generate the following message.
-```
-// Create NftItem and start an auction. Accepted only from NftCollection.
-teleitem_msg_deploy#299a3e15 sender_address:MsgAddressInt bid:Grams token_info:^TelemintTokenInfo nft_content:^Cell
-  auction_config:^TeleitemAuctionConfig royalty_params:^NftRoyaltyParams = TeleitemMsg;
-```
-
-All following bids are simple transfers.
-
-The owner of an NftItem may start a new auction.
-
-```
-// Start new auction. Accepted only from the owner.
-teleitem_msg_start_auction#487a8e81 query_id:int64 auction_config:^TeleitemAuctionConfig = TeleitemMsg;
-
-// Cancel auction auction. Accepted only from the owner. Forbidden if there are some active bids
-teleitem_msg_cancel_auction#371638ae query_id:int64 = TeleitemMsg;
+```typescript
+const nftData = await nft.getNftData();
+if (nftData.init && nftData.content) {
+    const parsedContent = parseNftContent(nftData.content);
+    // Используем parsedContent
+}
 ```
 
-The NftItem interface is also supported, including transfer messages.
+Подробнее об активации контрактов см. в [MINT_FLOW.md](./docs/MINT_FLOW.md#активация-nft-item-контракта).
 
-#### External messages
-To finish a completed auction, one may send an empty message.
+## Флоу минта
+
+1. Пользователь заходит на бэкенд и нажимает "Получить номер"
+2. Бэкенд генерирует доступный номер из пула
+3. Бэкенд формирует пейлоад и подписывает сообщение
+4. Пользователь получает подписанное сообщение
+5. Пользователь отправляет транзакцию в блокчейн
+6. Контракт минтит NFT и отправляет пользователю
+
+Подробное описание флоу см. в [docs/MINT_FLOW.md](./docs/MINT_FLOW.md).
+
+## Быстрый старт
+
+### Установка зависимостей
+
+```bash
+cd func
+npm install
+```
+
+### Сборка контрактов
+
+```bash
+npm run build
+```
+
+### Тестирование
+
+```bash
+npm test
+```
+
+Подробнее о тестах см. [документацию по тестам](./docs/tests.md).
+
+### Примеры использования
+
+Примеры кода находятся в `func/examples/`:
+- `backend-api.example.ts` - как создать бэкенд API для генерации подписанных сообщений
+- `frontend-mint.example.ts` - как отправить транзакцию минта с фронтенда
+
+Подробное описание флоу см. в [docs/MINT_FLOW.md](./docs/MINT_FLOW.md).
+
+## Документация
+
+- [Флоу минта](./docs/MINT_FLOW.md) - подробное описание процесса минта номеров из пула
+- [Тесты](./docs/tests.md) - описание тестов и покрытия функциональности
+
+## Helper функции
+
+Все helper функции экспортируются из `func/helpers/index.ts`:
+
+```typescript
+import {
+    createDirectMintAuctionConfig,
+    createNumberNftContent,
+    createUnsignedDeployMessageV2,
+    signDeployMessage,
+    createSignedDeployMessageV2,
+} from './helpers';
+```
+
+Подробнее см. документацию в файлах helper функций и [MINT_FLOW.md](./docs/MINT_FLOW.md#использование-helper-функций).
+
+## Лицензия
+
+См. [LICENSE](./LICENSE)

@@ -5,41 +5,42 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7315d25a-7090-4767-a9c5-23518a5ce116" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/.prettierignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/.prettierrc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/contracts/imports/stdlib.fc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/jest.config.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/jest.setup.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/scripts/deployTestContract.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/tests/NftCollection.spec.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/tests/TestContract.spec.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/tsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftCollection.compile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftCollection.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftCollectionNoDns.compile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftCollectionNoDns.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItem.compile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItem.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDns.compile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDns.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheap.compile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheap.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheapDelayed.compile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheapDelayed.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/TestContract.compile.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/func/wrappers/TestContract.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/common.fc" beforeDir="false" afterPath="$PROJECT_DIR$/func/contracts/imports/common.fc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/nft-collection-no-dns.fc" beforeDir="false" afterPath="$PROJECT_DIR$/func/contracts/nft-collection-no-dns.fc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/nft-collection.fc" beforeDir="false" afterPath="$PROJECT_DIR$/func/contracts/nft-collection.fc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/nft-item-no-dns-cheap-delayed.fc" beforeDir="false" afterPath="$PROJECT_DIR$/func/contracts/nft-item-no-dns-cheap-delayed.fc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/nft-item-no-dns-cheap.fc" beforeDir="false" afterPath="$PROJECT_DIR$/func/contracts/nft-item-no-dns-cheap.fc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/nft-item-no-dns.fc" beforeDir="false" afterPath="$PROJECT_DIR$/func/contracts/nft-item-no-dns.fc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func/nft-item.fc" beforeDir="false" afterPath="$PROJECT_DIR$/func/contracts/nft-item.fc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.cursor/rules" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/MINT_FLOW.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/examples/backend-api.example.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/examples/frontend-mint.example.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/helpers/auctionConfig.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/helpers/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/helpers/nftContent.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/helpers/restrictions.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/helpers/royaltyParams.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/helpers/signMessage.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/tests/NftCollectionNoDns.spec.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/tests/NftItemNoDnsCheap.spec.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func/tests/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/func/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/contracts/nft-collection.fc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/contracts/nft-item-no-dns-cheap-delayed.fc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/contracts/nft-item-no-dns.fc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/contracts/nft-item.fc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/jest.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/jest.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/scripts/deployTestContract.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/tests/NftCollection.spec.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/tests/TestContract.spec.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftCollection.compile.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftCollection.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftCollectionNoDns.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/wrappers/NftCollectionNoDns.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItem.compile.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItem.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/wrappers/NftItem.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDns.compile.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDns.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheap.ts" beforeDir="false" afterPath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheap.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheapDelayed.compile.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/NftItemNoDnsCheapDelayed.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/TestContract.compile.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/func/wrappers/TestContract.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +67,15 @@
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;Jest.NftCollection.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftCollectionNoDns.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftCollectionNoDns.should mint NFT with signed message.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftItemNoDnsCheap.Auction Operations.should complete auction when max bid is reached.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftItemNoDnsCheap.Get Methods.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftItemNoDnsCheap.Get Methods.should get NFT data after activation.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftItemNoDnsCheap.Get Methods.should get auction config.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftItemNoDnsCheap.Get Methods.should parse NFT content from Cell.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftItemNoDnsCheap.NFT Item Data Retrieval.should parse NFT content from Cell.executor&quot;: &quot;Run&quot;,
+    &quot;Jest.NftItemNoDnsCheap.executor&quot;: &quot;Run&quot;,
     &quot;Jest.TestContract.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
@@ -81,57 +91,80 @@
     &quot;ts.external.directory.path&quot;: &quot;/Users/barrylarge/Personal/telemint/func/node_modules/typescript/lib&quot;
   }
 }</component>
-  <component name="RunManager" selected="npm.build">
-    <configuration name="NftCollection" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Jest.NftItemNoDnsCheap.Auction Operations.should complete auction when max bid is reached">
+    <configuration name="NftCollectionNoDns" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
       <node-interpreter value="project" />
       <jest-package value="$PROJECT_DIR$/func/node_modules/jest" />
       <working-dir value="$PROJECT_DIR$/func" />
       <envs />
       <scope-kind value="SUITE" />
-      <test-file value="$PROJECT_DIR$/func/tests/NftCollection.spec.ts" />
+      <test-file value="$PROJECT_DIR$/func/tests/NftCollectionNoDns.spec.ts" />
       <test-names>
-        <test-name value="NftCollection" />
+        <test-name value="NftCollectionNoDns" />
       </test-names>
       <method v="2" />
     </configuration>
-    <configuration name="TestContract" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+    <configuration name="NftItemNoDnsCheap" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
       <node-interpreter value="project" />
       <jest-package value="$PROJECT_DIR$/func/node_modules/jest" />
       <working-dir value="$PROJECT_DIR$/func" />
       <envs />
       <scope-kind value="SUITE" />
-      <test-file value="$PROJECT_DIR$/func/tests/TestContract.spec.ts" />
+      <test-file value="$PROJECT_DIR$/func/tests/NftItemNoDnsCheap.spec.ts" />
       <test-names>
-        <test-name value="TestContract" />
+        <test-name value="NftItemNoDnsCheap" />
       </test-names>
       <method v="2" />
     </configuration>
-    <configuration name="bp" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/func/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="bp" />
-      </scripts>
+    <configuration name="NftItemNoDnsCheap.Auction Operations.should complete auction when max bid is reached" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
       <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/func/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/func" />
       <envs />
+      <scope-kind value="TEST" />
+      <test-file value="$PROJECT_DIR$/func/tests/NftItemNoDnsCheap.spec.ts" />
+      <test-names>
+        <test-name value="NftItemNoDnsCheap" />
+        <test-name value="Auction Operations" />
+        <test-name value="should complete auction when max bid is reached" />
+      </test-names>
       <method v="2" />
     </configuration>
-    <configuration name="build" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/func/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="build" />
-      </scripts>
+    <configuration name="NftItemNoDnsCheap.Get Methods.should get auction config" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
       <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/func/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/func" />
       <envs />
+      <scope-kind value="TEST" />
+      <test-file value="$PROJECT_DIR$/func/tests/NftItemNoDnsCheap.spec.ts" />
+      <test-names>
+        <test-name value="NftItemNoDnsCheap" />
+        <test-name value="Get Methods" />
+        <test-name value="should get auction config" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <configuration name="NftItemNoDnsCheap.Get Methods.should parse NFT content from Cell" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/func/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/func" />
+      <envs />
+      <scope-kind value="TEST" />
+      <test-file value="$PROJECT_DIR$/func/tests/NftItemNoDnsCheap.spec.ts" />
+      <test-names>
+        <test-name value="NftItemNoDnsCheap" />
+        <test-name value="Get Methods" />
+        <test-name value="should parse NFT content from Cell" />
+      </test-names>
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="npm.build" />
-        <item itemvalue="npm.bp" />
-        <item itemvalue="Jest.NftCollection" />
-        <item itemvalue="Jest.TestContract" />
+        <item itemvalue="Jest.NftItemNoDnsCheap.Auction Operations.should complete auction when max bid is reached" />
+        <item itemvalue="Jest.NftItemNoDnsCheap" />
+        <item itemvalue="Jest.NftCollectionNoDns" />
+        <item itemvalue="Jest.NftItemNoDnsCheap.Get Methods.should parse NFT content from Cell" />
+        <item itemvalue="Jest.NftItemNoDnsCheap.Get Methods.should get auction config" />
       </list>
     </recent_temporary>
   </component>
@@ -151,7 +184,7 @@
       <option name="presentableId" value="Default" />
       <updated>1714981888253</updated>
       <workItem from="1714981889309" duration="500000" />
-      <workItem from="1762367199824" duration="8262000" />
+      <workItem from="1762367199824" duration="21831000" />
     </task>
     <servers />
   </component>
