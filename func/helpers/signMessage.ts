@@ -3,18 +3,15 @@ import { sign } from '@ton/crypto';
 
 export type UnsignedDeployMessageV2 = {
     subwalletId: number;
-    validSince: number; // Unix timestamp
-    validTill: number; // Unix timestamp
-    tokenName: string; // Number from pool
-    content: Cell; // NFT content
+    validSince: number;
+    validTill: number;
+    tokenName: string;
+    content: Cell;
     auctionConfig: Cell;
     royaltyParams?: Cell;
     restrictions?: Cell;
 };
 
-/**
- * Creates unsigned deploy message v2 (for NftCollectionNoDns)
- */
 export function createUnsignedDeployMessageV2(params: UnsignedDeployMessageV2): Cell {
     const {
         subwalletId,
@@ -40,9 +37,6 @@ export function createUnsignedDeployMessageV2(params: UnsignedDeployMessageV2): 
         .endCell();
 }
 
-/**
- * Signs unsigned deploy message
- */
 export function signDeployMessage(
     unsignedMessage: Cell,
     privateKey: Buffer
@@ -51,15 +45,12 @@ export function signDeployMessage(
     return sign(hash, privateKey);
 }
 
-/**
- * Creates complete signed message for sending to contract
- */
 export function createSignedDeployMessageV2(
     unsignedMessage: Cell,
     signature: Buffer
 ): Cell {
     return beginCell()
-        .storeUint(0x4637289b, 32) // op::telemint_msg_deploy_v2
+        .storeUint(0x4637289b, 32)
         .storeBuffer(signature)
         .storeRef(unsignedMessage)
         .endCell();
