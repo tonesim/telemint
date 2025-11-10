@@ -289,11 +289,12 @@ describe('NftItemNoDnsCheap', () => {
             expect(nftData.content).toBeDefined();
             const parsedContent = parseNftContent(nftData.content!);
 
-            console.log(parsedContent)
+            console.log(parsedContent, nftData.content)
 
-            expect(parsedContent.number).toBe(tokenName);
-            expect(parsedContent.name).toBe(`Number ${tokenName}`);
-            expect(parsedContent.description).toBe(`Telegram number ${tokenName}`);
+            // Off-chain format stores only URI pointing to JSON metadata
+            expect(parsedContent.uri).toBeDefined();
+            expect(parsedContent.uri).toContain(tokenName);
+            expect(parsedContent.uri).toMatch(/^https:\/\/.*\/metadata\.json$/);
         });
     });
 

@@ -1,58 +1,67 @@
 import { beginCell, Cell, Slice } from '@ton/core';
 
 export type NftContentParams = {
-    name?: string;
-    description?: string;
-    image?: string;
-    [key: string]: any; // Additional fields
+    uri?: string; // URI pointing to JSON metadata
+    [key: string]: any; // Additional fields for backward compatibility
 };
 
 /**
- * Creates NFT content in on-chain format (JSON in Cell)
+ * Creates NFT content in off-chain format according to TEP-64
+ * Format: offchain#01 uri:Text
+ * This stores a URI pointing to JSON metadata, not the JSON itself
+ * 
+ * @param uri - URI string pointing to JSON metadata (e.g., "https://example.com/metadata/123.json")
  */
-export function createNftContent(params: NftContentParams): Cell {
-    const content = {
-        name: params.name || '',
-        description: params.description || '',
-        image: params.image || '',
-        ...params,
-    };
-
-    // Serialize JSON to Cell
-    const jsonString = JSON.stringify(content);
+export function createNftContent(uri: string): Cell {
     return beginCell()
-        .storeUint(0, 8) // off-chain content tag
-        .storeStringTail(jsonString)
+        .storeUint(1, 8) // offchain#01 tag
+        .storeStringTail(uri) // URI string
         .endCell();
 }
 
-export function createNumberNftContent(number: string, metadata?: Record<string, any>): Cell {
-    return createNftContent({
-        name: `Number ${number}`,
-        description: `Telegram number ${number}`,
-        number,
-        ...metadata,
-    });
+/**
+ * Creates NFT content for a phone number
+ * Generates a URI pointing to metadata JSON
+ * 
+ * @param number - Phone number
+ * @param metadataUri - Optional custom URI. If not provided, generates a default URI
+ */
+export function createNumberNftContent(number: string, metadataUri?: string): Cell {
+    // If URI is provided, use it directly
+    if (metadataUri) {
+        return createNftContent(metadataUri);
+    }
+    
+    // Otherwise, generate a default URI pattern
+    // In production, this should point to your actual metadata server
+    const uri = `https://api.example.com/nft/${number}/metadata.json`;
+    return createNftContent(uri);
 }
 
+/**
+ * Parses NFT content according to TEP-64
+ * Currently supports off-chain format (tag 0x01)
+ * For on-chain format (tag 0x00), returns empty object (backward compatibility)
+ * 
+ * @param cell - Cell containing NFT content
+ * @returns Object with URI field pointing to JSON metadata
+ */
 export function parseNftContent(cell: Cell): NftContentParams {
     const slice = cell.beginParse();
 
     // Read tag (first byte)
     const tag = slice.loadUint(8);
 
-    // If tag = 0, this is off-chain content (JSON string)
-    if (tag === 0) {
-        // Read string (JSON)
-        const jsonString = slice.loadStringTail();
-
-        try {
-            return JSON.parse(jsonString);
-        } catch (e) {
-            throw new Error(`Failed to parse NFT content JSON: ${e}`);
-        }
+    if (tag === 1) {
+        // Off-chain content: offchain#01 uri:Text
+        const uri = slice.loadStringTail();
+        // Return URI - caller should fetch JSON from this URI
+        return { uri };
+    } else if (tag === 0) {
+        // On-chain content: onchain#00 (not supported in current implementation)
+        // Return empty object for backward compatibility
+        return {};
     } else {
-        // For other content types (on-chain) different logic is needed
         throw new Error(`Unsupported NFT content tag: ${tag}`);
     }
 }
