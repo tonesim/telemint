@@ -1,16 +1,9 @@
 /**
  * E2E Mint NFT Script - Mints NFT in Mainnet
  * 
- * This script:
- * 1. Creates minting payload
- * 2. Sends transaction to mainnet using wallet
- * 3. Waits for confirmation
- * 4. Verifies NFT was created and reads all data
+ * Usage: ts-node scripts/mintNft.ts [tokenName]
  * 
- * Usage:
- *   ts-node scripts/mintNft.ts [tokenName]
- * 
- * Environment variables required:
+ * Required environment variables:
  *   - MNEMONIC: Wallet mnemonic phrase
  *   - TON_ENDPOINT: TON network endpoint
  *   - TON_API_KEY: API key (optional)
@@ -21,7 +14,6 @@
  *   - MINT_PRICE: Mint price in TON (default: 0.1)
  */
 
-// Load environment variables
 try {
     require('dotenv').config();
 } catch (e) {
@@ -30,17 +22,15 @@ try {
 
 import { Address, fromNano, toNano, Cell } from '@ton/core';
 import { TonClient, WalletContractV4 } from '@ton/ton';
-import { mnemonicToWalletKey } from '@ton/crypto';
+import { mnemonicToWalletKey, sha256 } from '@ton/crypto';
 import { NftCollectionNoDns } from '../wrappers/NftCollectionNoDns';
 import { NftItemNoDnsCheap } from '../wrappers/NftItemNoDnsCheap';
 import { createDirectMintAuctionConfig } from '../helpers/auctionConfig';
-import { createNumberNftContent, parseNftContent } from '../helpers/nftContent';
+import { createNumberNftContent } from '../helpers/nftContent';
 import { createNoRoyaltyParams } from '../helpers/royaltyParams';
 import { createRestrictions } from '../helpers/restrictions';
 import { createUnsignedDeployMessageV2, signDeployMessage } from '../helpers/signMessage';
-import { sha256 } from '@ton/crypto';
 
-// Colors for console output
 const colors = {
     reset: '\x1b[0m',
     green: '\x1b[32m',
@@ -48,7 +38,6 @@ const colors = {
     yellow: '\x1b[33m',
     blue: '\x1b[34m',
     cyan: '\x1b[36m',
-    magenta: '\x1b[35m',
 };
 
 function log(message: string, color: keyof typeof colors = 'reset') {
@@ -166,9 +155,8 @@ function loadConfig(): Config {
         throw new Error('MNEMONIC environment variable is required for minting');
     }
 
-    // Parse mnemonic (handle quoted strings)
     const mnemonic = mnemonicStr
-        .replace(/^["']|["']$/g, '') // Remove quotes
+        .replace(/^["']|["']$/g, '')
         .split(/\s+/)
         .filter(word => word.length > 0);
 
@@ -189,13 +177,9 @@ function loadConfig(): Config {
     };
 }
 
-async function createMintingPayload(
-    tokenName: string,
-    config: Config,
-    collection: ReturnType<typeof TonClient.prototype.open<NftCollectionNoDns>>
-): Promise<{ 
-    signature: Buffer; 
-    nftAddress: Address; 
+interface MintingPayload {
+    signature: Buffer;
+    nftAddress: Address;
     itemIndex: bigint;
     nftContent: Cell;
     auctionConfig: Cell;
@@ -203,15 +187,19 @@ async function createMintingPayload(
     restrictions: Cell;
     validSince: number;
     validTill: number;
-}> {
+}
+
+async function createMintingPayload(
+    tokenName: string,
+    config: Config,
+    collection: ReturnType<typeof TonClient.prototype.open<NftCollectionNoDns>>
+): Promise<MintingPayload> {
     logSection('Creating Minting Payload');
-    
+
     const now = Math.floor(Date.now() / 1000);
-    
     logInfo(`Token name: ${tokenName}`);
     logInfo(`Mint price: ${fromNano(config.mintPrice)} TON`);
-    
-    // Create payload components
+
     const nftContent = createNumberNftContent(tokenName);
     const auctionConfig = createDirectMintAuctionConfig({
         beneficiaryAddress: config.beneficiaryAddress,
@@ -234,18 +222,16 @@ async function createMintingPayload(
     });
 
     const signature = signDeployMessage(unsignedMessage, config.privateKey);
-    
-    // Calculate NFT address
     const itemIndex = await stringHash(tokenName);
     const nftAddress = await executeWithRateLimit(
         () => collection.getNftAddressByIndex(itemIndex),
         1000,
         1000
     );
-    
+
     logSuccess('Minting payload created');
     logInfo(`NFT address: ${nftAddress.toString()}`);
-    
+
     return {
         signature,
         nftAddress,
@@ -263,48 +249,36 @@ async function sendMintTransaction(
     client: TonClient,
     config: Config,
     collection: ReturnType<typeof TonClient.prototype.open<NftCollectionNoDns>>,
-    mintingPayload: {
-        signature: Buffer;
-        nftContent: Cell;
-        auctionConfig: Cell;
-        royaltyParams: Cell;
-        restrictions: Cell;
-        validSince: number;
-        validTill: number;
-    },
+    mintingPayload: MintingPayload,
     tokenName: string,
     walletAddress: Address
 ): Promise<void> {
     logSection('Sending Mint Transaction');
-    
+
     const key = await mnemonicToWalletKey(config.mnemonic);
     const walletContract = WalletContractV4.create({ publicKey: key.publicKey, workchain: 0 });
     const wallet = client.open(walletContract);
-    
-    // Verify wallet address matches
+
     const actualWalletAddress = walletContract.address;
     if (!actualWalletAddress.equals(walletAddress)) {
         logWarning(`Wallet address mismatch: expected ${walletAddress.toString()}, got ${actualWalletAddress.toString()}`);
     }
-    
+
     logInfo(`Wallet address: ${actualWalletAddress.toString()}`);
-    
-    // Check balance
+
     const balance = await wallet.getBalance();
     logInfo(`Wallet balance: ${fromNano(balance)} TON`);
-    
-    const totalNeeded = config.mintPrice + toNano('0.05'); // Mint price + fees
+
+    const totalNeeded = config.mintPrice + toNano('0.05');
     if (balance < totalNeeded) {
         throw new Error(`Insufficient balance. Need ${fromNano(totalNeeded)} TON, have ${fromNano(balance)} TON`);
     }
-    
+
     logSuccess('Balance is sufficient');
-    
-    // Get seqno before sending
+
     const seqno = await wallet.getSeqno();
     logInfo(`Current seqno: ${seqno}`);
-    
-    // Send transaction using sendDeployMessageV2 from wrapper
+
     logInfo('Sending transaction using sendDeployMessageV2...');
     await collection.sendDeployMessageV2(wallet.sender(key.secretKey), {
         value: config.mintPrice,
@@ -319,12 +293,11 @@ async function sendMintTransaction(
         restrictions: mintingPayload.restrictions,
     });
     logSuccess('Transaction sent! Waiting for confirmation...');
-    
-    // Wait for confirmation
+
     let currentSeqno = seqno;
     let attempts = 0;
     const maxAttempts = 60;
-    
+
     while (currentSeqno === seqno && attempts < maxAttempts) {
         await sleep(1000);
         try {
@@ -341,7 +314,7 @@ async function sendMintTransaction(
             logInfo(`Waiting... (${attempts}s)`);
         }
     }
-    
+
     if (currentSeqno === seqno) {
         logWarning('Transaction confirmation timeout. Check manually.');
     }
@@ -354,40 +327,36 @@ async function verifyNftAfterMint(
     nftAddress: Address
 ): Promise<boolean> {
     logSection('Verifying NFT After Mint');
-    
+
     let allPassed = true;
-    
+
     try {
-        // Check if NFT is deployed
         const nftState = await executeWithRateLimit(
             () => client.getContractState(nftAddress),
             2000,
             2000
         );
-        
+
         if (!nftState.state || nftState.state === 'uninitialized') {
             logWarning('NFT contract is not deployed yet. Waiting...');
             await sleep(5000);
-            
-            // Retry once
+
             const retryState = await executeWithRateLimit(
                 () => client.getContractState(nftAddress),
                 2000,
                 2000
             );
-            
+
             if (!retryState.state || retryState.state === 'uninitialized') {
                 logError('NFT contract is still not deployed. Transaction might have failed.');
                 return false;
             }
         }
-        
+
         logSuccess(`NFT contract is deployed (state: ${nftState.state})`);
-        
-        // Open NFT contract
+
         const nft = client.open(NftItemNoDnsCheap.createFromAddress(nftAddress));
-        
-        // Wait for activation with retries
+
         let activated = false;
         for (let i = 0; i < 10; i++) {
             try {
@@ -396,12 +365,11 @@ async function verifyNftAfterMint(
                     1000,
                     1000
                 );
-                
+
                 if (nftData.init) {
                     activated = true;
                     logSuccess('NFT is activated');
-                    
-                    // Verify data
+
                     const expectedIndex = await stringHash(tokenName);
                     if (nftData.index !== expectedIndex) {
                         logError(`Index mismatch: expected ${expectedIndex.toString()}, got ${nftData.index.toString()}`);
@@ -409,19 +377,18 @@ async function verifyNftAfterMint(
                     } else {
                         logSuccess('Index matches');
                     }
-                    
+
                     if (!nftData.collectionAddress.equals(config.collectionAddress)) {
                         logError(`Collection address mismatch`);
                         allPassed = false;
                     } else {
                         logSuccess('Collection address matches');
                     }
-                    
+
                     if (nftData.ownerAddress) {
                         logSuccess(`Owner: ${nftData.ownerAddress.toString()}`);
                     }
-                    
-                    // Read token name
+
                     try {
                         const tokenNameFromContract = await executeWithRateLimit(
                             () => nft.getTelemintTokenName(),
@@ -440,8 +407,7 @@ async function verifyNftAfterMint(
                             logWarning(`Could not get token name: ${error.message}`);
                         }
                     }
-                    
-                    // Read auction config
+
                     try {
                         const auctionConfig = await executeWithRateLimit(
                             () => nft.getTelemintAuctionConfig(),
@@ -457,8 +423,7 @@ async function verifyNftAfterMint(
                             logWarning(`Could not get auction config: ${error.message}`);
                         }
                     }
-                    
-                    // Read royalty params
+
                     try {
                         const royaltyParams = await executeWithRateLimit(
                             () => nft.getRoyaltyParams(),
@@ -472,23 +437,21 @@ async function verifyNftAfterMint(
                             logWarning(`Could not get royalty params: ${error.message}`);
                         }
                     }
-                    
+
                     break;
                 }
             } catch (error: any) {
-                if (!isRateLimitError(error)) {
-                    // NFT might not be activated yet
-                }
+                // NFT might not be activated yet
             }
-            
+
             await sleep(2000);
         }
-        
+
         if (!activated) {
             logError('NFT is not activated after multiple retries');
             allPassed = false;
         }
-        
+
     } catch (error: any) {
         if (isRateLimitError(error)) {
             logWarning('Rate limit exceeded. Skipping verification.');
@@ -497,15 +460,15 @@ async function verifyNftAfterMint(
             allPassed = false;
         }
     }
-    
+
     return allPassed;
 }
 
 async function main() {
     log('\n=== E2E NFT Minting in Mainnet ===\n', 'cyan');
-    
+
     const tokenName = process.argv[2] || `e2e_mint_${Date.now()}`;
-    
+
     let config: Config;
     try {
         config = loadConfig();
@@ -516,30 +479,26 @@ async function main() {
         logError(`Failed to load configuration: ${error.message}`);
         process.exit(1);
     }
-    
+
     const client = new TonClient({
         endpoint: config.endpoint,
     });
-    
+
     const collection = client.open(NftCollectionNoDns.createFromAddress(config.collectionAddress));
-    
+
     try {
-        // Step 1: Create minting payload
         const mintingPayload = await createMintingPayload(tokenName, config, collection);
-        
-        // Step 2: Get wallet address from mnemonic
+
         const key = await mnemonicToWalletKey(config.mnemonic);
         const walletContract = WalletContractV4.create({ publicKey: key.publicKey, workchain: 0 });
         const walletAddress = walletContract.address;
         logInfo(`Wallet address: ${walletAddress.toString()}`);
-        
-        // Step 3: Send transaction using sendDeployMessageV2
+
         await sendMintTransaction(client, config, collection, mintingPayload, tokenName, walletAddress);
-        
-        // Step 4: Verify NFT
+
         logSection('Verifying NFT');
         const verified = await verifyNftAfterMint(client, config, tokenName, mintingPayload.nftAddress);
-        
+
         if (verified) {
             logSuccess('\n✓ NFT minted successfully and verified!');
             logInfo(`NFT address: ${mintingPayload.nftAddress.toString()}`);
@@ -550,9 +509,9 @@ async function main() {
             logInfo('Please check manually:');
             logInfo(`  NFT address: ${mintingPayload.nftAddress.toString()}`);
             logInfo(`  Token name: ${tokenName}`);
-            process.exit(0); // Don't fail, transaction might still be processing
+            process.exit(0);
         }
-        
+
     } catch (error: any) {
         logError(`\n✗ Error: ${error.message}`);
         console.error(error);
@@ -565,4 +524,3 @@ main().catch(error => {
     console.error(error);
     process.exit(1);
 });
-

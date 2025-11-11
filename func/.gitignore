@@ -5,6 +5,11 @@ dist
 .DS_Store
 package.ts
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # VS Code
 .vscode/*
 .history/
